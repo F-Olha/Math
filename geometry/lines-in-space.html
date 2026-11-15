@@ -1,0 +1,106 @@
+<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Прямі в просторі та кут між ними</title>
+<style>
+:root{--bg:#f1f5f9;--fg:#0f172a;--mut:#64748b;--card:#fff;--bd:#cbd5e1;--acc:#1d4ed8;--grid:rgba(110,180,225,.32);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--fg:#f1f5f9;--mut:#94a3b8;--card:#162033;--bd:#2b3a55;--acc:#60a5fa;--grid:rgba(96,165,250,.14)}}
+:root[data-theme="dark"]{--bg:#0b1220;--fg:#f1f5f9;--mut:#94a3b8;--card:#162033;--bd:#2b3a55;--acc:#60a5fa;--grid:rgba(96,165,250,.14)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:14px}
+#w{max-width:960px;margin:0 auto}h1{font-size:19px;margin:2px 0 10px;text-align:center}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;align-items:center}
+button{font:inherit;font-weight:600;padding:7px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--fg);cursor:pointer}
+button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px;margin:8px 0}
+canvas{width:100%;display:block;touch-action:pan-y;cursor:grab;border-radius:10px}
+#cap{margin-top:8px;background:#1e293b;color:#fff;border-radius:10px;padding:8px 12px;font-size:15px;min-height:5.4em}
+label{font-size:14px;color:var(--mut)}input[type=range]{min-width:140px}
+.q button{display:block;width:100%;text-align:left;margin:4px 0}.q small{color:var(--mut)}.ok{background:#16a34a!important;color:#fff}.no{background:#dc2626!important;color:#fff}
+body.j{background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+body.j h1{text-transform:uppercase}body.j .card{border:2px solid #8fcdf3;border-radius:16px}body.j #cap{background:#1d6fd8}
+body.j canvas{background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+</style></head><body><div id="w"><h1>Прямі в просторі та кут між ними</h1>
+<div class="row"><b>Стиль:</b><button id="m0" onclick="setMode(0)">🎓 Серйозно</button><button id="m1" onclick="setMode(1)">😄 Жартома</button></div>
+<div class="row" id="tabs"></div><div class="row" id="sub"></div>
+<div class="card"><canvas id="cv"></canvas><div id="cap"></div></div>
+<div class="row"><button id="pl">⏸ Пауза</button><input type="range" id="sl" min="0" max="1" step="0.001" value="0" style="flex:1"><label><input type="checkbox" id="au" checked> рух камери</label></div>
+<div class="row"><label id="xs"><span id="xt"></span> <input type="range" id="ex" min="0" max="1" step="0.005" value="0"></label><label id="xc"><input type="checkbox" id="ck"> <span id="xk"></span></label></div>
+<div class="card" id="info"></div>
+<details class="card"><summary><b>Перевір себе</b></summary><div id="qz"></div></details></div>
+<script>
+const $=i=>document.getElementById(i),cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),ez=x=>x*x*(3-2*x),PI=Math.PI;
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],mul=(a,k)=>[a[0]*k,a[1]*k,a[2]*k],dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],nm=a=>Math.hypot(...a),nrm=a=>mul(a,1/nm(a));
+const IN='#2563eb',OUT='#dc2626',AM='#d97706',cv=$('cv'),g=cv.getContext('2d');
+let cs=0,T=0,E=0,CK=false,sel=0,play=true,J=false,yaw=-.6,pit=.45,sw=1,drag=null,clock=0,last=0,W,H,S,FG,CD,cy,sy,cp,sp,OV=null,ct='',CT=[0,0,0];
+const sb=s=>s.replace(/1/g,'₁');
+const V={A:[0,0,0],B:[3,0,0],C:[3,3,0],D:[0,3,0],A1:[0,0,3],B1:[3,0,3],C1:[3,3,3],D1:[0,3,3]},EG=['A B','B C','C D','D A','A1 B1','B1 C1','C1 D1','D1 A1','A A1','B B1','C C1','D D1'].map(s=>s.split(' '));
+const PR=[['AD і DC','cross',['A','D'],['D','C'],['A','B','C','D'],'D'],['A₁B₁ і B₁C₁','cross',['A1','B1'],['B1','C1'],['A1','B1','C1','D1'],'B1'],['AA₁ і BB₁','par',['A','A1'],['B','B1'],['A','B','B1','A1'],''],['DC і A₁B₁','par',['D','C'],['A1','B1'],['D','C','B1','A1'],''],['A₁D₁ і BB₁','skew',['A1','D1'],['B','B1'],['A1','B1','C1','D1'],'B1'],['B₁C₁ і DD₁','skew',['B1','C1'],['D','D1'],['A1','B1','C1','D1'],'D1']];
+const PD=[['A₁D і D₁C',['A1','D'],['D1','C'],[0,-3,0],'A1','D','B','У △A₁BD усі сторони — діагоналі рівних квадратів, тож він рівносторонній.'],['BC і AA₁',['B','C'],['A','A1'],[3,0,0],'B','C','B1','BB₁ ⊥ BC: ребро куба перпендикулярне до основи.'],['AC і A₁B',['A','C'],['A1','B'],[0,3,0],'C','A','D1','У △ACD₁ усі сторони — діагоналі граней, тож він рівносторонній.'],['AB і A₁C₁',['A','B'],['A1','C1'],[0,0,-3],'A','B','C','△ABC прямокутний (∠B = 90°) і рівнобедрений (AB = BC — ребра куба), тож кут при A дорівнює 45°.']];
+const SUB=[0,PR.map(p=>p[0]),0,PD.map(p=>p[0])],XS=['','','Кут між прямими: тягніть повзунок',''],XC=['Позначити другу точку B','','',''],XD=[0,0,.33,0];
+const NAMES=['Через точку — безліч прямих','Взаємне розміщення','Кут між прямими, що перетинаються','Кут між мимобіжними'];
+const INFO=['Через будь-яку точку простору проходить безліч прямих, а через будь-які дві різні точки — лише одна пряма.',
+'<b>Перетинаються:</b> лежать в одній площині й мають одну спільну точку. <b>Паралельні:</b> лежать в одній площині й не мають спільних точок. <b>Мимобіжні:</b> не лежать в одній площині, спільних точок немає. <b>Ознака мимобіжності:</b> якщо одна пряма лежить у площині, а друга перетинає цю площину в точці, що не належить першій прямій, то прямі мимобіжні.',
+'<b>Кут між прямими, що перетинаються</b> — це менший із утворених кутів (не більший за 90°). Паралельні прямі утворюють кут 0°. Отже, 0° ≤ φ ≤ 90°.',
+'<b>Кут між мимобіжними прямими</b> — кут між прямими, що перетинаються та паралельні даним (теорема 33.1: він не залежить від вибору точки перетину). <b>Алгоритм:</b> 1) беремо точку на одній прямій; 2) проводимо через неї пряму, паралельну другій; 3) знаходимо кут із трикутника.'];
+const CAP=[[[.88,'Через точку A проводимо пряму за прямою — і так без кінця.','Ще пряма! І ще! Промені з усіх боків!'],[9,'Через точку проходить безліч прямих. Позначте другу точку B.','Безліч прямих через A! Познач точку B.']]];
+const Q=[['Скільки прямих можна провести через одну точку?',['Одну','Дві','Безліч'],2,'Через точку проходить безліч прямих, а через дві точки — одна.'],
+['Прямі не мають спільних точок. Які вони?',['Паралельні','Мимобіжні','Паралельні або мимобіжні'],2,'Якщо лежать в одній площині — паралельні, інакше мимобіжні.'],
+['У кубі ABCDA₁B₁C₁D₁ знайдіть кут між прямими A₁D і D₁C.',['30°','45°','60°','90°'],2,'D₁C ∥ A₁B, △A₁BD рівносторонній.'],
+['Кут між прямими AA₁ і BC куба ABCDA₁B₁C₁D₁?',['0°','45°','90°'],2,'AA₁ ∥ BB₁, а BB₁ ⊥ BC.']];
+$('qz').innerHTML=Q.map((x,i)=>`<div class="q"><b>${i+1}. ${x[0]}</b>${x[1].map((o,j)=>`<button onclick="ans(this,${i},${j})">${o}</button>`).join('')}<small></small></div>`).join('');
+function ans(b,i,j){const ok=j==Q[i][2];b.classList.add(ok?'ok':'no');b.parentNode.querySelector('small').textContent=(ok?'Так. ':'Ні. ')+Q[i][3]}
+$('tabs').innerHTML=NAMES.map((n,i)=>`<button data-i="${i}" onclick="setScene(${i})">${n}</button>`).join('');
+function pick(j){sel=j;T=0;play=true;$('pl').textContent='⏸ Пауза';mk()}
+function mk(){[...$('sub').children].forEach(b=>b.classList.toggle('on',b.dataset.j==sel))}
+function setScene(i){cs=i;T=0;E=XD[i];CK=false;sel=0;play=true;ct='';$('ex').value=E;$('ck').checked=false;$('pl').textContent='⏸ Пауза';$('xs').style.display=XS[i]?'':'none';$('xc').style.display=XC[i]?'':'none';$('xt').textContent=XS[i];$('xk').textContent=XC[i];
+$('sub').innerHTML=(SUB[i]||[]).map((n,j)=>`<button data-j="${j}" onclick="pick(${j})">${n}</button>`).join('');mk();[...$('tabs').children].forEach(b=>b.classList.toggle('on',b.dataset.i==i));$('info').innerHTML=INFO[i]}
+function setMode(j){J=!!j;document.body.classList.toggle('j',J);$('m0').classList.toggle('on',!J);$('m1').classList.toggle('on',J)}
+function size(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;W=r.width;H=Math.round(W*(W<640?1:.62));cv.style.height=H+'px';cv.width=W*d;cv.height=H*d;g.setTransform(d,0,0,d,0,0)}
+addEventListener('resize',size);
+cv.onpointerdown=e=>{drag=[e.clientX,e.clientY];cv.setPointerCapture(e.pointerId)};
+cv.onpointermove=e=>{if(!drag)return;yaw+=(e.clientX-drag[0])*.008;if(e.pointerType=='mouse')pit=cl(pit+(e.clientY-drag[1])*.006,.1,1.3);drag=[e.clientX,e.clientY]};
+cv.onpointerup=cv.onpointercancel=()=>{drag=null};
+const hold=()=>{T=1;play=false;$('pl').textContent='▶ Пуск'};
+$('pl').onclick=()=>{play=!play;$('pl').textContent=play?'⏸ Пауза':'▶ Пуск'};$('sl').oninput=e=>{T=+e.target.value};
+$('ex').oninput=e=>{E=+e.target.value;hold()};$('ck').onchange=e=>{CK=e.target.checked;hold()};
+const ph=(a,b)=>ez(cl((T-a)/(b-a))),sc2=p=>{const x=p[0]-CT[0],y=p[1]-CT[1],z=p[2]-CT[2],X=x*cy-y*sy,Y=x*sy+y*cy;return[W/2+S*X,H*.5-S*(z*cp+Y*sp)]};
+function fill(pts,c){g.beginPath();pts.forEach((p,i)=>{const q=sc2(p);i?g.lineTo(...q):g.moveTo(...q)});g.closePath();g.fillStyle=c;g.fill();g.strokeStyle=J?'#2b7fd8':'rgba(37,99,235,.6)';g.lineWidth=J?2:1;g.stroke()}
+const pl=(c,a,b,x,y)=>[[1,1],[1,-1],[-1,-1],[-1,1]].map(([s,t])=>add(c,add(mul(a,x*s),mul(b,y*t))));
+function seg(a,b,col,w=2,dash){const p=sc2(a),q=sc2(b);g.lineCap='round';if(J&&w>=3&&!dash){g.beginPath();g.moveTo(...p);g.lineTo(...q);g.strokeStyle='rgba(15,23,42,.8)';g.lineWidth=w+3;g.stroke()}g.beginPath();g.setLineDash(dash||[]);g.moveTo(...p);g.lineTo(...q);g.strokeStyle=col;g.lineWidth=J?w:w*.6+.6;g.stroke();g.setLineDash([])}
+function ln(P,Q,k,col,w,x=.6){const d=sub(Q,P),e=-x+(1+2*x)*k,at=t=>add(P,mul(d,t));for(const[a,b,ds]of[[-x,0,[5,4]],[0,1,null],[1,1+x,[5,4]]]){const bb=Math.min(b,e);if(bb>a)seg(at(a),at(bb),col,w,ds)}}
+function pt(p,col,r=5){const q=sc2(p);g.beginPath();g.arc(q[0],q[1],r,0,7);g.fillStyle=col;g.fill();g.strokeStyle=J?'#111':FG;g.lineWidth=J?2.5:1;g.stroke()}
+function tx(t,p,dx=0,dy=0,col,f){const q=sc2(p);g.font=(J?'italic bold ':'italic ')+(f||18)+'px "Times New Roman",Georgia,serif';g.textAlign='center';g.lineWidth=4;g.strokeStyle=CD;g.strokeText(t,q[0]+dx,q[1]+dy);g.fillStyle=col||FG;g.fillText(t,q[0]+dx,q[1]+dy)}
+const em=(e,p,dy=-16)=>{if(!J)return;const q=sc2(p);g.font='22px system-ui';g.textAlign='center';g.fillText(e,q[0],q[1]+dy)};
+const vh=(e,q)=>{const d=sub(V[q[1]],V[q[0]]);return e!='🚗'||d[2]==0?e:d[0]==0&&d[1]==0?'🎈':'🚡'};
+function cube(){let far,fd=-1e9;for(const n in V){const p=V[n],x=p[0]-1.5,y=p[1]-1.5,z=p[2]-1.5,d=(x*sy+y*cy)*cp-z*sp;if(d>fd){fd=d;far=n}}
+EG.forEach(([a,b])=>seg(V[a],V[b],'#64748b',1.5,(a==far||b==far)?[5,4]:null));for(const n in V)tx(sb(n),V[n],0,V[n][2]>1?-9:21,'#475569',16)}
+const dr=i=>{const z=1-2*(i+.5)/24,r=Math.sqrt(1-z*z),t=i*2.39996;return[r*Math.cos(t),r*Math.sin(t),z]};
+function sA(){CT=[0,0,0];const n=Math.round(1+ph(0,.85)*23),O=[0,0,0],B=mul(dr(5),3.3);
+for(let i=0;i<n;i++){const d=dr(i),hot=CK&&i==5;g.globalAlpha=CK&&!hot?.22:1;seg(mul(d,-3.5),mul(d,3.5),hot?OUT:`hsl(${i*15},70%,48%)`,hot?4.5:3);g.globalAlpha=1}
+pt(O,OUT,6);tx('A',O,-12,20,OUT);if(CK){pt(B,OUT,6);tx('B',B,12,-8,OUT);OV=['Через дві різні точки A і B проходить лише одна пряма; решта прямих через A точку B не містять.','Через дві точки — лише одна пряма!']}}
+function sB(){CT=[1.5,1.5,1.5];const[,ty,a,b,pf,m]=PR[sel],kp=ph(.5,.75),km=ph(.75,.9),an=sb(a.join('')),bn=sb(b.join('')),pn=sb(pf.join('')),e=ty=='cross'?'✈️':ty=='par'?'⚡':'🚗';
+if(kp>0)fill(pf.map(n=>V[n]),`rgba(125,196,244,${.4*kp})`);cube();ln(V[a[0]],V[a[1]],ph(.05,.25),IN,4);ln(V[b[0]],V[b[1]],ph(.25,.45),AM,4);
+for(const[q,k]of[[a,ph(.05,.25)],[b,ph(.25,.45)]])if(k>0){const P=V[q[0]],d=sub(V[q[1]],P);em(vh(e,q),add(P,mul(d,-.6+2.2*k)),7)}if(m&&km>0)pt(V[m],OUT,7*km);
+const tp={cross:[`Обидві прямі лежать у площині ${pn} і мають спільну точку ${sb(m)}: вони перетинаються.`,'✈️ Літаки зустрілись у точці!'],par:[`Обидві прямі лежать у площині ${pn} і не мають спільних точок: вони паралельні.`,'⚡ Дроти ЛЕП ніколи не зустрінуться.'],skew:[`Пряма ${an} лежить у площині ${pn}, а пряма ${bn} перетинає її в точці ${sb(m)}, що не належить ${an}. За ознакою прямі мимобіжні.`,'Не перетинаються й не паралельні — мимобіжні!']}[ty];
+OV=T<.5?[`Куб ABCDA₁B₁C₁D₁: розглянемо прямі ${an} і ${bn}.`,'Дивимось на дві прямі куба…']:tp}
+function sC(){CT=[0,0,0];const th=E*PI,deg=Math.round(E*180),ka=ph(.05,.3),pp=(t,r)=>[r*Math.cos(t),r*Math.sin(t),0],par=deg<2||deg>178,L=4.6*ka;
+fill(pl([0,0,0],[1,0,0],[0,1,0],5.2,3.6),'rgba(125,196,244,.35)');tx('α',[4.8,-3.2,0],0,0,IN);seg([-L,0,0],[L,0,0],IN,4);seg(mul(pp(th,1),-L),mul(pp(th,1),L),AM,4);
+if(ka>.9){tx('a',[L+.3,0,0],10,-6,IN);tx('b',mul(pp(th,1),L+.3),10,-6,AM);pt([0,0,0],OUT,6);tx('O',[0,0,0],-12,20,OUT)}
+if(!par&&ka>.9){const sm=th<=PI/2;for(const[a0,a1,hot]of[[0,th,sm],[th,PI,!sm]]){let pr;for(let i=0;i<=20;i++){const p=pp(a0+(a1-a0)*i/20,hot?1.1:1.5);if(pr)seg(pr,p,hot?OUT:'#94a3b8',hot?3:1.5);pr=p}tx(Math.round((a1-a0)*180/PI)+'°',pp((a0+a1)/2,hot?1.8:2.3),0,5,hot?OUT:'#64748b')}}
+OV=par?['Прямі паралельні (збігаються в цій площині): кут між ними 0°.','Паралельні — кут 0°!']:[`Прямі утворюють кути ${deg}° і ${180-deg}°. Кутом між прямими вважають той, що не більший за 90°: φ = ${Math.min(deg,180-deg)}°.`,`Кути ${deg}° і ${180-deg}° — беремо менший: ${Math.min(deg,180-deg)}°!`]}
+function sD(){CT=[1.5,1.5,1.5];const[,a,b,v,M,Va,Vb,note]=PD[sel],k=ph(.25,.7),R=V[b[0]],X=V[b[1]],R2=add(R,mul(v,k)),S2=add(X,mul(v,k)),kt=ph(.78,.9),u=sub(V[Va],V[M]),w=sub(V[Vb],V[M]),deg=Math.round(Math.acos(Math.abs(dot(u,w))/(nm(u)*nm(w)))*180/PI),an=sb(a.join('')),bn=sb(b.join(''));
+if(kt>0)fill([V[M],V[Va],V[Vb]],`rgba(250,204,21,${.5*kt})`);cube();ln(V[a[0]],V[a[1]],ph(.03,.15),IN,4);
+ln(R,X,ph(.1,.2),k>0?'rgba(217,119,6,.35)':AM,k>0?2:4);
+if(k>0){seg(R,R2,'#94a3b8',1.5,[3,3]);seg(X,S2,'#94a3b8',1.5,[3,3]);ln(R2,S2,1,AM,4)}
+if(T<.2){em(vh('🚗',a),V[a[1]]);em(vh('🚗',b),V[b[1]])}
+if(T>.7)pt(V[M],OUT,7);if(kt>0){let pr;for(let i=0;i<=16;i++){const q=add(V[M],mul(nrm(add(mul(u,1-i/16),mul(w,i/16))),.9));if(pr)seg(pr,q,OUT,3);pr=q}tx(deg+'°',add(V[M],mul(nrm(add(nrm(u),nrm(w))),1.5)),0,5,OUT,19)}
+OV=T<.25?[`Прямі ${an} і ${bn} мимобіжні: спільних точок немає, в одній площині вони не лежать.`,'Дві прямі на різних «рівнях»…']:T<.7?[`Переносимо ${bn} паралельно самій собі до перетину з ${an}.`,'Пересуваємо паралельно…']:T<.78?[`Тепер ${bn}′ ∥ ${bn} перетинає ${an} у точці ${sb(M)}. Кут між ${an} і ${bn}′ дорівнює кутові між ${an} і ${bn} (теорема 33.1).`,'Перетнулись!']:[`${note} Отже, кут між ${an} і ${bn} дорівнює ${deg}°.`,`Ось і кут: ${deg}°! 🎯`]}
+const SC=[sA,sB,sC,sD],stg=()=>{const i=CAP[0].findIndex(x=>T<x[0]);return i<0?CAP[0].length-1:i};
+function bub(m){const x=34,y=H-12-(T>.95?Math.abs(Math.sin(clock*8))*10:0);g.save();g.strokeStyle=FG;g.lineWidth=3;g.lineCap='round';g.beginPath();g.moveTo(x,y-45);g.lineTo(x,y-22);g.lineTo(x-9,y);g.moveTo(x,y-22);g.lineTo(x+9,y);g.moveTo(x,y-40);g.lineTo(x+13,y-28);g.moveTo(x,y-40);g.lineTo(x-13,y-52+Math.sin(clock*4)*7);g.stroke();
+g.beginPath();g.arc(x,y-54,10,0,7);g.fillStyle='#fff';g.fill();g.stroke();g.fillStyle='#111';g.fillRect(x-5,y-56,3,3);g.fillRect(x+2,y-56,3,3);
+g.font='13px system-ui,sans-serif';const mw=Math.min(210,W*.55),ls=[];let cur='';for(const s of m.split(' ')){const t=cur?cur+' '+s:s;if(g.measureText(t).width>mw-14&&cur){ls.push(cur);cur=s}else cur=t}ls.push(cur);
+const bh=ls.length*16+10,bx=x+26,by=y-54-bh/2;g.fillStyle='#fff';g.strokeStyle='#2b7fd8';g.lineWidth=2;g.beginPath();g.roundRect(bx,by,mw,bh,10);g.fill();g.stroke();g.fillStyle='#0f172a';g.textAlign='left';ls.forEach((l,i)=>g.fillText(l,bx+7,by+17+i*16));g.restore()}
+function draw(){const st=getComputedStyle(document.documentElement);FG=st.getPropertyValue('--fg').trim();CD=st.getPropertyValue('--card').trim();
+sw+=((drag||!$('au').checked?0:1)-sw)*.08;const yw=yaw+.3*sw*Math.sin(clock*.5);cy=Math.cos(yw);sy=Math.sin(yw);cp=Math.cos(pit);sp=Math.sin(pit);S=Math.min(W/10,H/8);
+g.clearRect(0,0,W,H);OV=null;SC[cs]();const o=OV||CAP[0][stg()].slice(1);if(o[0]!=ct){ct=o[0];$('cap').textContent=o[0]}if(J)bub(o[1])}
+function fr(n){const d=Math.min(.05,(n-last)/1000);last=n;clock+=d;if(play){T+=d/16;if(T>1.12)T=0}$('sl').value=Math.min(T,1);draw();requestAnimationFrame(fr)}
+size();setMode(0);setScene(0);requestAnimationFrame(fr);
+</script></body></html>
