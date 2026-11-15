@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Формули без страху</title>
+<style>
+:root{--bg:#f1f5f9;--fg:#0f172a;--mut:#64748b;--card:#fff;--bd:#e2e8f0;--acc:#2563eb;--ok:#16a34a;--okb:#dcfce7;--bad:#dc2626;--badb:#fee2e2;--a:#2563eb;--b:#ea580c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--fg:#f1f5f9;--mut:#94a3b8;--card:#162033;--bd:#2b3a55;--acc:#60a5fa;--okb:#14532d;--badb:#7f1d1d;--a:#60a5fa;--b:#fb923c}}
+:root[data-theme="dark"]{--bg:#0b1220;--fg:#f1f5f9;--mut:#94a3b8;--card:#162033;--bd:#2b3a55;--acc:#60a5fa;--okb:#14532d;--badb:#7f1d1d;--a:#60a5fa;--b:#fb923c}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:17px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:14px}
+#app{max-width:680px;margin:0 auto}
+h1{font-size:24px;margin:4px 0}h2{font-size:20px;margin:0 0 8px}
+.mut{color:var(--mut);font-size:14px}.a{color:var(--a);font-weight:700}.b{color:var(--b);font-weight:700}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin:12px 0}
+.lv{display:flex;gap:12px;align-items:center;width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.lv .e{font-size:30px}.lv.lock{opacity:.45;cursor:not-allowed}.hl{border:2px solid #f59e0b}
+.btn{font:inherit;font-weight:600;padding:10px 18px;border-radius:12px;border:0;background:var(--acc);color:#fff;cursor:pointer}
+.btn.g{background:transparent;color:var(--acc);border:1px solid var(--bd)}
+.opt{display:block;width:100%;margin:8px 0;padding:12px;font:inherit;font-size:18px;border-radius:12px;border:2px solid var(--bd);background:var(--card);color:var(--fg);cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--acc)}.opt.ok{border-color:var(--ok);background:var(--okb)}.opt.no{border-color:var(--bad);background:var(--badb)}
+.q{font-size:22px;line-height:2.1;margin:8px 0 14px}
+.in{width:3.4em;font:inherit;font-size:20px;text-align:center;padding:2px 4px;border:2px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg)}
+.in.ok{border-color:var(--ok);background:var(--okb)}.in.no{border-color:var(--bad);background:var(--badb)}
+.dots{display:flex;gap:6px;margin:6px 0}.dots i{flex:1;height:10px;border-radius:5px;background:var(--bd)}.dots i.on{background:var(--ok)}
+.fb{padding:12px;border-radius:12px;margin-top:12px}.fb.ok{background:var(--okb)}.fb.no{background:var(--badb)}
+.hint{margin-top:10px;padding:10px;border-radius:10px;border:1px dashed var(--acc);font-size:15px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.sq{display:grid;grid-template-columns:3fr 1.4fr;grid-template-rows:3fr 1.4fr;gap:3px;width:200px;height:200px;margin:10px auto;text-align:center;font-weight:700;color:#fff}
+.sq div{display:flex;align-items:center;justify-content:center;border-radius:6px}
+.stars{font-size:34px;text-align:center;margin:8px 0}
+details{margin-top:10px}summary{cursor:pointer;font-weight:600}
+</style></head><body><div id="app"></div>
+<script>
+const $=i=>document.getElementById(i),R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,pick=a=>a[R(0,a.length-1)],sh=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
+const A='<span class="a">a</span>',B='<span class="b">b</span>',GOAL=5;
+let S={u:1,st:{}};try{S=JSON.parse(localStorage.getItem('skm'))||S}catch(e){}
+const save=()=>{try{localStorage.setItem('skm',JSON.stringify(S))}catch(e){}};
+const mc=(q,ok,bad,hint)=>({q,opts:sh([ok,...bad]),ok,hint});
+const gaps=(pool)=>()=>{const p=pick(pool);return mc(p[0],p[1],p[2],p[3])};
+const L1=[
+['(a + b)² = a² + ▢ + b²','2ab',['ab','a²b²','2a + 2b'],'Подвійний добуток: 2 · a · b. Уявіть квадрат зі стороною a + b: у ньому два однакові прямокутники ab.'],
+['(a − b)² = a² ▢ 2ab + b²','−',['+','·','÷'],'У квадраті різниці подвійний добуток береться зі знаком мінус.'],
+['a² − b² = (a − b)(▢)','a + b',['a − b','a² + b²','ab'],'Різниця квадратів = добуток різниці на суму.'],
+['(a − b)² = a² − 2ab + ▢','b²',['b','−b²','2b²'],'Останній доданок — квадрат другого числа, завжди зі знаком плюс.'],
+['(a + b)² = ▢ + 2ab + b²','a²',['a','2a²','a³'],'Перший доданок — квадрат першого числа.'],
+['Яка рівність ПОМИЛКОВА?','(a + b)² = a² + b²',['(a − b)² = a² − 2ab + b²','a² − b² = (a − b)(a + b)','(a + b)² = a² + 2ab + b²'],'Пропущено подвійний добуток 2ab — найчастіша помилка!'],
+['a² − b² = ▢','(a − b)(a + b)',['(a − b)²','(a + b)²','a² + b²'],'Різниця квадратів розкладається на дві дужки з різними знаками.']];
+const NM=['Квадрат суми','Квадрат різниці','Різниця квадратів','Формула не підходить'];
+const g2=()=>{const t=R(0,3),q=R(2,7),p=pick([1,1,2,3]),X=p>1?p+'x':'x',P=p*p>1?p*p+'x²':'x²';let e,k,h;
+if(t==0){e=pick([`${P} + ${2*p*q}x + ${q*q}`,`(${X} + ${q})²`]);k=0;h='Три доданки, обидва крайні — квадрати, середній — подвоєний добуток, усі знаки «+».'}
+else if(t==1){e=pick([`${P} − ${2*p*q}x + ${q*q}`,`(${X} − ${q})²`]);k=1;h='Крайні — квадрати, середній — подвоєний добуток зі знаком «−».'}
+else if(t==2){e=pick([`${P} − ${q*q}`,`(${X} − ${q})(${X} + ${q})`]);k=2;h='Два квадрати через мінус, або дужки «різниця × сума».'}
+else{e=pick([`${P} + ${q*q}`,`${P} + ${2*q+1}x + ${q*q}`]);k=3;h='Сума квадратів не розкладається, а в середньому доданку немає подвоєного добутку.'}
+return {q:`Яку формулу тут можна застосувати?<br><b>${e}</b>`,opts:NM.slice(),ok:NM[k],hint:h,fixed:1}};
+const g3=()=>{if(Math.random()<.25)return g3m();const t=R(0,3),q=R(2,9),p=R(2,4);
+if(t==0)return{q:`(x + ${q})² = x² + {}x + {}`,ans:[2*q,q*q],hint:`(a + b)² = a² + 2ab + b², де a = x, b = ${q}.`};
+if(t==1)return{q:`(x − ${q})² = x² − {}x + {}`,ans:[2*q,q*q],hint:`(a − b)² = a² − 2ab + b², де a = x, b = ${q}.`};
+if(t==2)return{q:`(x − ${q})(x + ${q}) = x² − {}`,ans:[q*q],hint:`(a − b)(a + b) = a² − b², де b = ${q}.`};
+return{q:`(${p}x + ${q})² = {}x² + {}x + {}`,ans:[p*p,2*p*q,q*q],hint:`a = ${p}x, b = ${q}: a² = ${p*p}x², 2ab = 2·${p}x·${q}, b² = ${q*q}.`}};
+const g4=()=>{const t=R(0,3),q=R(2,9),p=R(2,4);
+if(t==0)return{q:`x² + ${2*q}x + ${q*q} = (x + {})²`,ans:[q],hint:`Подвоєний добуток ${2*q}x = 2·x·${q}, а ${q*q} = ${q}².`};
+if(t==1)return{q:`x² − ${q*q} = (x − {})(x + {})`,ans:[q,q],hint:`${q*q} = ${q}², тож це різниця квадратів x² і ${q}².`};
+if(t==2)return{q:`x² − ${2*q}x + ${q*q} = (x − {})²`,ans:[q],hint:`Це (x − ${q})²: ${q}² = ${q*q}, 2·x·${q} = ${2*q}x.`};
+return{q:`${p*p}x² − ${q*q} = ({}x − {})({}x + {})`,ans:[p,q,p,q],hint:`${p*p}x² = (${p}x)², ${q*q} = ${q}².`}};
+const g5=()=>{const b=pick([20,30,40,50,60,100]),k=R(1,3),m=Math.random()<.5;
+if(Math.random()<.5){const v=m?b+k:b-k,s=m?'+':'−';return{q:`Обчисли в умі: ${v}² = {}`,ans:[v*v],hint:`${v}² = (${b} ${s} ${k})² = ${b*b} ${s} ${2*b*k} + ${k*k}`}}
+return{q:`Обчисли в умі: ${b-k} · ${b+k} = {}`,ans:[b*b-k*k],hint:`(${b} − ${k})(${b} + ${k}) = ${b}² − ${k}² = ${b*b} − ${k*k}`}};
+const g3m=()=>{const q=R(2,9),m=Math.random()<.5,s=m?'+':'−';return mc(`Яке розкриття правильне?<br><b>(x ${s} ${q})² = ?</b>`,`x² ${s} ${2*q}x + ${q*q}`,[`x² ${s} ${q*q}`,`x² ${s} ${q}x + ${q*q}`,`x² ${s} ${2*q}x − ${q*q}`],'Квадрат двочлена: перший² ± подвоєний добуток + другий². Останній доданок завжди з «+».')};
+const mcN=(q,ok,bad,hint)=>{const w=[...new Set(bad.map(String))].filter(x=>x!=String(ok)).slice(0,4);return{q,opts:sh([String(ok),...w]),ok:String(ok),hint,L:1}};
+const g7=()=>{const t=R(0,5),s=R(3,9),p=R(1,Math.floor(s*s/4)),d=R(1,6),m=R(2,5),n=R(2,9),k=R(3,7),N=R(30,500),j=R(2,5),a=R(2,9),b=R(2,9);
+if(t==0)return{q:`Відомо, що a + b = ${s}, ab = ${p}. Тоді a² + b² = {}`,ans:[s*s-2*p],hint:'a² + b² = (a + b)² − 2ab. Знаходити a і b окремо не потрібно.'};
+if(t==1)return{q:`Відомо, що a − b = ${d}, ab = ${p}. Тоді a² + b² = {}`,ans:[d*d+2*p],hint:'a² + b² = (a − b)² + 2ab.'};
+if(t==2)return{q:`Відомо, що a² − b² = ${m*n}, a + b = ${m}. Тоді a − b = {}`,ans:[n],hint:'a² − b² = (a − b)(a + b), отже a − b = (a² − b²) : (a + b).'};
+if(t==3)return{q:`Відомо, що x + 1/x = ${k}. Тоді x² + 1/x² = {}`,ans:[k*k-2],hint:'Піднесіть до квадрата: (x + 1/x)² = x² + 2 + 1/x².'};
+if(t==4)return{q:`Обчисліть: ${N}² − (${N} − ${j})(${N} + ${j}) = {}`,ans:[j*j],hint:`(${N} − ${j})(${N} + ${j}) = ${N}² − ${j}², тож ${N}² скоротяться.`};
+return{q:`Обчисліть (a + b)² − (a − b)² при a = ${a}, b = ${b}: {}`,ans:[4*a*b],hint:'(a + b)² − (a − b)² = 4ab.'}};
+const g8=()=>{const t=R(0,3);
+if(t==0){const q=R(2,7);return mcN(`Спростіть вираз: (x + ${q})² − (x − ${q})²`,`${4*q}x`,[`${2*q}x`,`2x² + ${2*q*q}`,`${4*q*q}`,`${q*q}`],'Розкрийте обидві дужки: x² скоротяться, а подвоєні добутки додадуться.')}
+if(t==1){const m=R(6,15),n=R(2,4);return mcN(`Обчисліть: (√${m} + √${n})(√${m} − √${n})`,m-n,[m+n,m*n,m-n+1,m-n-1],'(a + b)(a − b) = a² − b², а (√m)² = m.')}
+if(t==2){const p=R(2,6),s=R(14,30);return mcN(`Відомо, що a² + b² = ${s}, ab = ${p}. Знайдіть (a − b)²`,s-2*p,[s+2*p,s-p,s+p,2*s-2*p],'(a − b)² = a² + b² − 2ab.')}
+const p=R(2,4),q=R(2,7);return mcN(`Розкрийте дужки: (${p}x − ${q})²`,`${p*p}x² − ${2*p*q}x + ${q*q}`,[`${p*p}x² − ${q*q}`,`${p*p}x² + ${2*p*q}x + ${q*q}`,`${p}x² − ${2*p*q}x + ${q*q}`,`${p*p}x² − ${p*q}x + ${q*q}`],`(a − b)² = a² − 2ab + b², де a = ${p}x, b = ${q}.`)};
+const C6=[['a³ + b³ = (a + b)(a² ▢ ab + b²)','−',['+','·','− 2'],'У другій дужці знак протилежний знаку в першій дужці.'],
+['a³ − b³ = (a − b)(a² ▢ ab + b²)','+',['−','·','+ 2'],'У неповному квадраті після різниці стоїть «+».'],
+['(a + b)³ = a³ + ▢ + 3ab² + b³','3a²b',['3ab','a²b','3a²b²'],'Коефіцієнти 1, 3, 3, 1; степінь a спадає, b зростає.']];
+const g6=()=>{const t=R(0,4),q=R(1,3),r=R(2,3);
+if(t==0)return{q:`(x + ${q})³ = x³ + {}x² + {}x + ${q**3}`,ans:[3*q,3*q*q],hint:`(a + b)³ = a³ + 3a²b + 3ab² + b³, де b = ${q}.`};
+if(t==1)return{q:`(x − ${q})³ = x³ − {}x² + {}x − ${q**3}`,ans:[3*q,3*q*q],hint:`(a − b)³ = a³ − 3a²b + 3ab² − b³, де b = ${q}.`};
+if(t==2)return{q:`x³ + ${r**3} = (x + {})(x² − {}x + {})`,ans:[r,r,r*r],hint:`a³ + b³ = (a + b)(a² − ab + b²), b = ${r}.`};
+if(t==3)return{q:`x³ − ${r**3} = (x − {})(x² + {}x + {})`,ans:[r,r,r*r],hint:`a³ − b³ = (a − b)(a² + ab + b²), b = ${r}.`};
+const p=pick(C6);return mc(p[0],p[1],p[2],p[3])};
+const LV=[
+{n:'Знайомство',e:'🌱',g:gaps(L1),d:`Усе починається з двох чисел ${A} і ${B}. Запам’ятайте три формули:<br><b>(${A} + ${B})² = ${A}² + 2${A}${B} + ${B}²</b><br><b>(${A} − ${B})² = ${A}² − 2${A}${B} + ${B}²</b><br><b>${A}² − ${B}² = (${A} − ${B})(${A} + ${B})</b><div class="sq"><div style="background:var(--a)">a²</div><div style="background:#f59e0b">ab</div><div style="background:#f59e0b">ab</div><div style="background:var(--b)">b²</div></div><span class="mut">Квадрат зі стороною a + b складається з чотирьох частин — тому й з’являється 2ab.</span><br>Завдання: заповніть пропуски у формулах.`},
+{n:'Впізнай формулу',e:'🔍',g:g2,d:'Тепер замість a і b — вирази з x. Дивіться на вигляд: три доданки чи два? Які знаки? Чи є подвоєний добуток?'},
+{n:'Розкрий дужки',e:'📦',g:g3,d:'Розкривайте дужки за формулою й вписуйте числа у пропуски. Знаки вже стоять — потрібні тільки числа.'},
+{n:'Згорни у добуток',e:'🧩',g:g4,d:'Навпаки: бачите суму чи різницю — знайдіть число в дужках. Часто допомагає спершу знайти, чий це квадрат: 49 = 7².'},
+{n:'Лічба в умі',e:'⚡',g:g5,d:`Формули роблять арифметику швидкою: 99² = (100 − 1)², а 49 · 51 = (50 − 1)(50 + 1). Рахуйте в умі!`},
+{n:'Кубічні боси',e:'🐉',g:g6,d:`Фінал. Куби:<br><b>(${A} + ${B})³ = ${A}³ + 3${A}²${B} + 3${A}${B}² + ${B}³</b><br><b>${A}³ + ${B}³ = (${A} + ${B})(${A}² − ${A}${B} + ${B}²)</b><br><b>${A}³ − ${B}³ = (${A} − ${B})(${A}² + ${A}${B} + ${B}²)</b>`},
+{n:'НМТ: числові задачі',e:'🎯',g:g7,d:'Задачі у стилі НМТ: потрібне значення не дане напряму, а ховається за формулою. Часто не треба знаходити a і b окремо — достатньо перетворити вираз, наприклад a² + b² = (a + b)² − 2ab. Відповідь — число.'},
+{n:'НМТ: тест А–Д',e:'🏁',g:g8,d:'Тест із п’ятьма варіантами відповіді, як на НМТ. Серед варіантів завжди є «пастки» з типовими помилками — не поспішайте.'}];
+let run=null;
+const open=i=>i<4||[0,1,2,3].every(k=>S.st[k]);const star=n=>'★'.repeat(n)+'☆'.repeat(3-n);
+function map(){run=null;let h=`<h1>🧮 Формули без страху</h1><div class="mut">Рівні 1–4 можна проходити в будь-якому порядку; після них відкривається вища ліга, де рівні теж обираються вільно. Щоб пройти рівень, дайте ${GOAL} правильних відповідей. Помилки не штрафуються — вони підказують.</div>`;
+LV.forEach((l,i)=>{if(i==4)h+='<h2 style="margin-top:22px">🏅 Вища ліга</h2><div class="mut">Куби, швидка лічба та задачі у стилі НМТ — для тих, хто пройшов рівні 1–4.</div>';const o=open(i),s=S.st[i]||0;h+=`<button class="card lv ${i>=4?'hl':''} ${o?'':'lock'}" ${o?`onclick="intro(${i})"`:'disabled'}><span class="e">${o?l.e:'🔒'}</span><span><b>Рівень ${i+1}. ${l.n}</b><br><span class="mut">${s?star(s):o?'готові до старту':'спершу пройдіть рівні 1–4'}</span></span></button>`});
+h+=`<details class="card"><summary>Шпаргалка</summary><p>(${A}+${B})² = ${A}² + 2${A}${B} + ${B}²<br>(${A}−${B})² = ${A}² − 2${A}${B} + ${B}²<br>${A}²−${B}² = (${A}−${B})(${A}+${B})<br>(${A}+${B})³ = ${A}³ + 3${A}²${B} + 3${A}${B}² + ${B}³<br>(${A}−${B})³ = ${A}³ − 3${A}²${B} + 3${A}${B}² − ${B}³<br>${A}³+${B}³ = (${A}+${B})(${A}²−${A}${B}+${B}²)<br>${A}³−${B}³ = (${A}−${B})(${A}²+${A}${B}+${B}²)</p></details>`;$('app').innerHTML=h}
+function intro(i){const l=LV[i];$('app').innerHTML=`<div class="card"><h2>${l.e} Рівень ${i+1}. ${l.n}</h2><p>${l.d}</p><div class="row"><button class="btn" onclick="start(${i})">Почати</button><button class="btn g" onclick="map()">До карти</button></div></div>`}
+function start(i){run={i,done:0,mist:0,answered:false,seen:new Set()};next()}
+function next(){let q,n=0;do{q=LV[run.i].g();n++}while(run.seen.has(q.q)&&n<60);run.seen.add(q.q);run.q=q;run.answered=false;draw()}
+function dots(){return `<div class="dots">${Array.from({length:GOAL},(_,k)=>`<i class="${k<run.done?'on':''}"></i>`).join('')}</div>`}
+function draw(fb=''){const q=run.q,l=LV[run.i];let b;
+if(q.opts)b=`<div class="q">${q.q}</div>`+q.opts.map((o,k)=>`<button class="opt" data-k="${k}" onclick="pickOpt(${k})">${q.L?'АБВГД'[k]+') ':''}${o}</button>`).join('');
+else{const p=q.q.split('{}');b=`<div class="q">${p.map((s,k)=>s+(k<p.length-1?`<input class="in" data-i="${k}" autocomplete="off" inputmode="text">`:'')).join('')}</div><div class="row"><button class="btn" id="ck" onclick="check()">Перевірити</button></div>`}
+$('app').innerHTML=`<div class="row" style="justify-content:space-between;margin:0"><button class="btn g" onclick="map()">← Карта</button><b>${l.e} Рівень ${run.i+1}</b></div>${dots()}<div class="card">${b}<div class="row"><button class="btn g" onclick="$('h').hidden=!$('h').hidden">💡 Підказка</button></div><div class="hint" id="h" hidden>${q.hint}</div><div id="fb">${fb}</div></div>`;
+const f=document.querySelector('.in');if(f){f.focus();document.querySelectorAll('.in').forEach(x=>x.addEventListener('keydown',e=>{if(e.key=='Enter')run.answered?next():check()}))}}
+const nz=s=>String(s).replace(/[\s·*]/g,'').replace(/[−–]/g,'-').replace(/\^2/g,'²').replace(/\^3/g,'³').replace(',','.').toLowerCase();
+function verdict(ok,solution){if(run.answered)return;run.answered=true;let fb;
+if(ok){run.done++;fb=`<div class="fb ok">✅ ${pick(['Чудово!','Так!','Влучно!','Саме так!'])}</div>`}
+else{run.mist++;fb=`<div class="fb no">Майже, і це нормально — ось як правильно:<br><b>${solution}</b><br><span class="mut">${run.q.hint}</span></div>`}
+if(run.done>=GOAL)fb+=`<div class="row"><button class="btn" onclick="finish()">Рівень пройдено! 🎉</button></div>`;
+else fb+=`<div class="row"><button class="btn" onclick="next()">Далі →</button></div>`;
+document.querySelector('.dots').outerHTML=dots();$('fb').innerHTML=fb;const b=$('ck');if(b)b.disabled=true;
+document.querySelectorAll('.opt').forEach(o=>{o.disabled=true})}
+function pickOpt(k){if(run.answered)return;const q=run.q,ok=q.opts[k]==q.ok;
+document.querySelectorAll('.opt').forEach((o,j)=>{if(q.opts[j]==q.ok)o.classList.add('ok');else if(j==k)o.classList.add('no')});verdict(ok,q.ok)}
+function check(){if(run.answered)return;const q=run.q,ins=[...document.querySelectorAll('.in')];let all=true;
+if(ins.some(x=>!x.value.trim())){$('fb').innerHTML='<div class="fb no">Заповніть усі пропуски.</div>';return}
+ins.forEach((x,k)=>{const o=nz(x.value)==nz(q.ans[k]);all=all&&o;x.classList.add(o?'ok':'no')});
+const p=q.q.split('{}');verdict(all,p.map((s,k)=>s+(k<q.ans.length?`<u>${q.ans[k]}</u>`:'')).join(''))}
+function finish(){const was=open(4),i=run.i,s=run.mist==0?3:run.mist<=2?2:1;S.st[i]=Math.max(S.st[i]||0,s);S.u=Math.max(S.u,Math.min(LV.length,i+2));save();
+const last=LV.every((_,k)=>S.st[k]);
+$('app').innerHTML=`<div class="card" style="text-align:center"><h2>${last?'🏆 Ви — майстер формул!':'🎉 Рівень пройдено!'}</h2><div class="stars">${star(s)}</div>${i<4&&!was&&open(4)?'<p><b>🏅 Відкрито вищу лігу!</b></p>':''}<p>${last?'Тепер формули скороченого множення — не страшні, а корисні помічники. Повертайтеся до шпаргалки, коли захочете.':s==3?'Без жодної помилки!':'Помилок: '+run.mist+'. Пройдіть ще раз, щоб отримати більше зірок.'}</p><div class="row" style="justify-content:center">${last||i==LV.length-1||!open(i+1)?'':`<button class="btn" onclick="intro(${i+1})">Наступний рівень →</button>`}<button class="btn g" onclick="start(${i})">Ще раз</button><button class="btn g" onclick="map()">До карти</button></div></div>`}
+map();
+</script></body></html>
