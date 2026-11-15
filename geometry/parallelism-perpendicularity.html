@@ -1,0 +1,163 @@
+<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Паралельність і перпендикулярність у просторі</title>
+<style>
+:root{--bg:#f1f5f9;--fg:#0f172a;--mut:#64748b;--card:#fff;--bd:#cbd5e1;--acc:#1d4ed8;--grid:rgba(110,180,225,.32);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--fg:#f1f5f9;--mut:#94a3b8;--card:#162033;--bd:#2b3a55;--acc:#60a5fa;--grid:rgba(96,165,250,.14)}}
+:root[data-theme="dark"]{--bg:#0b1220;--fg:#f1f5f9;--mut:#94a3b8;--card:#162033;--bd:#2b3a55;--acc:#60a5fa;--grid:rgba(96,165,250,.14)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:14px}
+#w{max-width:960px;margin:0 auto}h1{font-size:19px;margin:2px 0 10px;text-align:center}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;align-items:center}
+button{font:inherit;font-weight:600;padding:7px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--fg);cursor:pointer}
+button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px;margin:8px 0}
+canvas{width:100%;display:block;touch-action:pan-y;cursor:grab;border-radius:10px}
+#cap{margin-top:8px;background:#1e293b;color:#fff;border-radius:10px;padding:8px 12px;font-size:15px;min-height:5.4em}
+label{font-size:14px;color:var(--mut)}input[type=range]{min-width:140px}
+.q button{display:block;width:100%;text-align:left;margin:4px 0}.q small{color:var(--mut)}.ok{background:#16a34a!important;color:#fff}.no{background:#dc2626!important;color:#fff}
+body.j{background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+body.j h1{text-transform:uppercase}body.j .card{border:2px solid #8fcdf3;border-radius:16px}body.j #cap{background:#1d6fd8}
+body.j canvas{background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+body.j h1::before{content:"✏️ "}body.j h1::after{content:" 💡"}</style></head><body><div id="w"><h1>Паралельність і перпендикулярність у просторі</h1>
+<div class="row"><b>Стиль:</b><button id="m0" onclick="setMode(0)">🎓 Серйозно</button><button id="m1" onclick="setMode(1)">😄 Жартома</button></div>
+<div class="row" id="tabs"></div><div class="row" id="sub"></div>
+<div class="card"><canvas id="cv"></canvas><div id="cap"></div></div>
+<div class="row"><button id="pl">⏸ Пауза</button><input type="range" id="sl" min="0" max="1" step="0.001" value="0" style="flex:1"><label><input type="checkbox" id="au" checked> рух камери</label><label><input type="checkbox" id="all"> усі сцени підряд</label></div>
+<div class="row"><label id="xs"><span id="xt"></span> <input type="range" id="ex" min="0" max="1" step="0.005" value="0"></label></div>
+<div class="card" id="info"></div>
+<details class="card"><summary><b>Перевір себе</b></summary><div id="qz"></div></details></div>
+<script>const $=i=>document.getElementById(i),cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),ez=x=>x*x*(3-2*x),PI=Math.PI;
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],mul=(a,k)=>[a[0]*k,a[1]*k,a[2]*k],dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],nm=a=>Math.hypot(...a),nrm=a=>mul(a,1/nm(a)),lerp=(a,b,k)=>add(a,mul(sub(b,a),k));
+const X=[1,0,0],Y=[0,1,0],Z=[0,0,1],O=[0,0,0],Q=(c,a,b,x,y)=>[[1,1],[1,-1],[-1,-1],[-1,1]].map(([s,t])=>add(c,add(mul(a,x*s),mul(b,y*t))));
+const IN='#2563eb',OUT='#dc2626',AM='#d97706',GN='#16a34a',PA=[125,196,244,.42],PB=[179,157,219,.5],PY=[250,204,21,.5],PG=[129,199,132,.4],PP=[244,143,177,.45];
+const cv=$('cv'),g=cv.getContext('2d');
+let cs=0,T=0,U=.5,ov=null,play=true,J=false,yaw=-.6,pit=.45,sw=1,drag=null,clock=0,last=0,W,H,S,FG,CD,cy,sy,cp,sp,CT=[0,0,1.4],ct='',capAt=0;
+const ph=(a,b)=>ez(cl((T-a)/(b-a))),sc2=p=>{const x=p[0]-CT[0],y=p[1]-CT[1],z=p[2]-CT[2],x1=x*cy-y*sy,y1=x*sy+y*cy;return[W/2+S*x1,H*.5-S*(z*cp+y1*sp)]};
+function fp(pts,c,k=1){if(k<=0)return;g.beginPath();pts.forEach((p,i)=>{const q=sc2(p);i?g.lineTo(...q):g.moveTo(...q)});g.closePath();g.fillStyle=`rgba(${c[0]},${c[1]},${c[2]},${c[3]*k})`;g.fill();g.strokeStyle=J?'#2b7fd8':'rgba(37,99,235,.6)';g.globalAlpha=k;g.lineWidth=J?2:1;g.stroke();g.globalAlpha=1}
+function ln(a,b,col,w=3,k=1,dash){if(k<=0)return;b=lerp(a,b,k);const p=sc2(a),q=sc2(b);g.lineCap='round';if(J&&w>=3&&!dash){g.beginPath();g.moveTo(...p);g.lineTo(...q);g.strokeStyle='rgba(15,23,42,.8)';g.lineWidth=w+3;g.stroke()}g.beginPath();g.setLineDash(dash||[]);g.moveTo(...p);g.lineTo(...q);g.strokeStyle=col;g.lineWidth=J?w:w*.6+.6;g.stroke();g.setLineDash([])}
+function tx(t,p,dx=0,dy=0,col,f){const q=sc2(p);g.font=(J?'italic bold ':'italic ')+(f||18)+'px "Times New Roman",Georgia,serif';g.textAlign='center';g.lineWidth=4;g.strokeStyle=CD;g.strokeText(t,q[0]+dx,q[1]+dy);g.fillStyle=col||FG;g.fillText(t,q[0]+dx,q[1]+dy)}
+function txs(t,x,y,col){g.font='bold 15px system-ui,sans-serif';g.textAlign='left';g.lineWidth=4;g.strokeStyle=CD;g.strokeText(t,x,y);g.fillStyle=col||FG;g.fillText(t,x,y)}
+function pt(p,col,k=1,l,dx=0,dy=0){if(k<=0)return;const q=sc2(p);g.beginPath();g.arc(q[0],q[1],5.5*k,0,7);g.fillStyle=col;g.fill();g.strokeStyle=J?'#111':FG;g.lineWidth=J?2.5:1;g.stroke();if(l&&k>.9)tx(l,p,dx,dy,col)}
+function rt(V,a,b,col,k=1,s=.5){if(k<=0)return;a=nrm(a);b=nrm(b);const p=[add(V,mul(a,s)),add(add(V,mul(a,s)),mul(b,s)),add(V,mul(b,s))].map(sc2);g.beginPath();g.moveTo(...p[0]);g.lineTo(...p[1]);g.lineTo(...p[2]);g.strokeStyle=col;g.lineWidth=2.2;g.globalAlpha=k;g.stroke();g.globalAlpha=1}
+function arc(V,d1,d2,col,r,l,k=1){if(k<=0)return;const u=nrm(d1),w=nrm(d2),an=Math.acos(cl(dot(u,w),-1,1));if(an<.02)return;let pr;for(let i=0;i<=24;i++){const t=i/24,p=add(V,mul(add(mul(u,Math.sin((1-t)*an)),mul(w,Math.sin(t*an))),r/Math.sin(an)));if(pr)ln(pr,p,col,3,1);pr=p}if(l)tx(l,add(V,mul(nrm(add(u,w)),r+.6)),0,5,col)}
+const L2=(P,d,a,b,col,k)=>ln(sub(P,mul(d,a)),add(P,mul(d,b)),col,4,k),fl=k=>{fp(Q(O,X,Y,5.5,3.8),PA,k);if(k>.5)tx('α',[5,-3.2,0],0,0,IN)},E=(P,dx)=>add(P,[dx,0,0]);
+const CV={A:[0,0,0],B:[3,0,0],C:[3,3,0],D:[0,3,0],A1:[0,0,3],B1:[3,0,3],C1:[3,3,3],D1:[0,3,3]};
+const SC=[
+{g:0,n:'Паралельна пряма через точку',t:.8,d:.55,x:'Перемістіть точку B',ct:[0,0,1],
+c:[[.25,'Нехай задано пряму a.','Ось пряма a.'],[.45,'Позначимо точку B, що не лежить на a.','А це точка B — не на прямій!'],[.7,'Проведемо через B пряму b, паралельну a.','Проводимо b паралельно — не зустрінуться!'],[9,'Така пряма b існує й лише одна: b ∥ a. Перемістіть B — пряма b «слідує» за точкою.','Єдина! Посунь B — b поїде слідом.']],
+i:'<b>Теорема.</b> Через точку, яка не лежить на даній прямій, можна провести пряму, паралельну даній, і до того ж тільки одну: B ∉ a ⇒ існує єдина b ∥ a.',
+f(){const d=nrm([1,.25,0]),a0=[-3.2,-1.2,0],B=[-.4,.4+2.2*U,0];fl(ph(0,.1));L2(a0,d,.8,7.4,IN,ph(.05,.25));if(T>.25)tx('a',add(a0,mul(d,7.6)),8,-4,IN);pt(B,OUT,ph(.3,.4),'B',-12,18);L2(B,d,3.6,4.4,AM,ph(.45,.7));if(T>.7)tx('b',add(B,mul(d,4.6)),8,-4,AM)}},
+{g:0,n:'Ознака паралельності прямих',t:.5,ct:[0,-.8,1.8],
+c:[[.2,'Нехай c — деяка пряма.','Ось пряма c.'],[.45,'Нехай a ∥ c (вони лежать в одній площині).','Пряма a паралельна c.'],[.7,'Нехай b ∥ c (вони лежать в іншій площині).','І b теж паралельна c.'],[9,'Тоді a ∥ b: дві прямі, паралельні третій, паралельні між собою.','Отже a ∥ b — паралельність передається!']],
+i:'<b>Ознака паралельності прямих.</b> Дві прямі, паралельні третій прямій, паралельні між собою: b ∥ a, c ∥ a ⇒ b ∥ c.',
+f(){const e=nrm([0,-2.6,-1]),L=4,c0=[0,0,1.6],a0=[0,0,3.6],b0=[0,-2.6,.6];fp(Q([0,0,2.6],X,Z,L,1.4),PA,ph(.05,.2));fp(Q([0,-1.3,1.1],X,e,L,1.9),PB,ph(.45,.55));
+L2(c0,X,L,L,GN,ph(.1,.25));L2(a0,X,L,L,IN,ph(.25,.45));L2(b0,X,L,L,OUT,ph(.5,.7));if(T>.25)tx('c',E(c0,L+.3),8,0,GN);if(T>.45)tx('a',E(a0,L+.3),8,0,IN);if(T>.7)tx('b',E(b0,L+.3),8,0,OUT);if(T>.8)txs('a ∥ c,  b ∥ c  ⇒  a ∥ b',12,26)}},
+{g:0,n:'Ознака паралельності прямої й площини',t:.8,d:.5,x:'Піднімайте пряму b',ct:[0,0,1.4],
+c:[[.25,'Нехай пряма a лежить у площині α.','Пряма a лежить у площині.'],[.5,'Візьмемо пряму b поза α, паралельну a.','Пряма b — над площиною, паралельна a.'],[.7,'Проведемо площину через a і b.','Накриваємо їх площиною.'],[9,'Пряма b не має з α спільних точок: b ∥ α. Піднімайте b — паралельність зберігається.','Хоч піднімай, хоч опускай — b ∥ α!']],
+i:'<b>Ознака паралельності прямої і площини.</b> Якщо пряма, яка не належить площині, паралельна якій-небудь прямій у цій площині, то вона паралельна і самій площині: b ∥ a, a ⊂ α ⇒ b ∥ α.',
+f(){const h=1+2.6*U,a0=[0,-.9,0],b0=[0,.9,h],e=nrm(sub(b0,a0)),L=4;fl(ph(0,.1));fp(Q(mul(add(a0,b0),.5),X,e,L,nm(sub(b0,a0))/2+.6),PB,ph(.5,.65));L2(a0,X,L,L,IN,ph(.05,.25));L2(b0,X,L,L,AM,ph(.3,.5));
+if(T>.25)tx('a',E(a0,L+.3),8,0,IN);if(T>.5)tx('b',E(b0,L+.3),8,0,AM);if(T>.7)txs('b ∩ α = ∅  ⇒  b ∥ α',12,26)}},
+{g:0,n:'Ознака паралельності площин',t:.85,d:.5,x:'Змінюйте відстань між площинами',z:.9,ct:[0,0,1.8],
+c:[[.4,'У площині α візьмемо прямі a₁, b₁, що перетинаються в точці A.','Дві прямі в площині α.'],[.55,'Візьмемо площину β.','Над нею — площина β.'],[.8,'Проведемо в β через точку B прямі a₂ ∥ a₁ і b₂ ∥ b₁.','Тут теж дві прямі — паралельні тим, що внизу.'],[9,'Отже, α ∥ β.','Площини паралельні!']],
+i:'<b>Ознака паралельності площин.</b> Якщо дві прямі, що перетинаються, однієї площини відповідно паралельні двом прямим іншої площини, то ці площини паралельні: a₁ ∥ a₂, b₁ ∥ b₂ ⇒ α ∥ β.',
+f(){const d1=nrm([1,.35,0]),d2=nrm([-.4,1,0]),h=1.4+2.4*U,B=[.8,.5,h],L=4.2;fl(ph(0,.1));fp(Q(B,X,Y,5.5,3.8),PB,ph(.45,.55));if(T>.5)tx('β',[5,-3.2,h],0,0,'#7c3aed');
+L2(O,d1,L,L,IN,ph(.1,.3));L2(O,d2,L*.8,L*.8,AM,ph(.25,.4));pt(O,OUT,ph(.35,.4),'A',-12,18);L2(B,d1,L,L,IN,ph(.55,.7));L2(B,d2,L*.8,L*.8,AM,ph(.65,.8));pt(B,OUT,ph(.7,.75),'B',-12,18);
+if(T>.3){tx('a₁',mul(d1,L+.4),0,0,IN);tx('b₁',mul(d2,L*.8+.4),0,0,AM)}if(T>.7){tx('a₂',add(B,mul(d1,L+.4)),0,0,IN);tx('b₂',add(B,mul(d2,L*.8+.4)),0,0,AM)}}},
+{g:0,n:'Властивість: перетин паралельних площин',t:.8,ct:[0,.4,1.6],
+c:[[.3,'Нехай α ∥ β.','Дві паралельні площини.'],[.45,'Проведемо площину γ, що перетинає обидві.','Розрізаємо їх третьою площиною.'],[.7,'γ ∩ α = a, γ ∩ β = b.','Лінії перетину — a та b.'],[9,'a ∥ b: прямі перетину паралельних площин третьою паралельні.','Лінії паралельні — ось і властивість!']],
+i:'<b>Властивість 1.</b> Якщо дві паралельні площини перетинаються третьою, то прямі перетину паралельні: α ∥ β, γ ∩ α = a, γ ∩ β = b ⇒ a ∥ b.',
+f(){const a0=[0,-.5,0],b0=[0,1.8,3],e=nrm(sub(b0,a0)),L=4.6;fl(ph(0,.1));fp(Q([0,0,3],X,Y,5.5,3.8),PB,ph(.1,.25));if(T>.25)tx('β',[5,-3.2,3],0,0,'#7c3aed');
+fp(Q(mul(add(a0,b0),.5),X,e,L,nm(sub(b0,a0))/2+.8),PP,ph(.3,.45));L2(a0,X,L,L,IN,ph(.45,.6));L2(b0,X,L,L,AM,ph(.55,.7));
+if(T>.6)tx('a',E(a0,L+.3),8,0,IN);if(T>.7)tx('b',E(b0,L+.3),8,0,AM);if(T>.45)tx('γ',add(mul(add(a0,b0),.5),[-L+.6,0,.2]),0,0,'#be185d');if(T>.8)txs('a ∥ b',12,26)}},
+{g:0,n:'Властивість: відрізки між площинами',t:.85,d:.4,x:'Змінюйте нахил прямих',z:.9,ct:[0,0,1.8],
+c:[[.2,'Нехай α ∥ β.','Дві паралельні площини.'],[.5,'Паралельні прямі a і b перетинають α і β.','Дві паралельні прямі пронизують обидві.'],[.75,'Відрізки B₁B₂ і A₁A₂ лежать між площинами.','Відрізки між площинами.'],[9,'B₁B₂A₂A₁ — паралелограм, тож A₁A₂ = B₁B₂.','Паралелограм — отже відрізки рівні!']],
+i:'<b>Властивість 2.</b> Відрізки паралельних прямих, що містяться між двома паралельними площинами, рівні: α ∥ β, a ∥ b ⇒ A₁A₂ = B₁B₂.',
+f(){const h=3.2,v=nrm([.1+.6*U,.2,1]),s=h/v[2],B1=[-1.5,-1.2,0],A1=[1.8,-.2,0],B2=add(B1,mul(v,s)),A2=add(A1,mul(v,s));fl(ph(0,.1));fp(Q([0,0,h],X,Y,5.5,3.8),PB,ph(.1,.2));if(T>.2)tx('β',[5,-3.2,h],0,0,'#7c3aed');
+fp([B1,B2,A2,A1],PY,ph(.75,.9));ln(sub(B1,mul(v,.8)),add(B2,mul(v,.8)),'#94a3b8',2,ph(.25,.5),[5,4]);ln(sub(A1,mul(v,.8)),add(A2,mul(v,.8)),'#94a3b8',2,ph(.3,.5),[5,4]);
+ln(B1,B2,OUT,5,ph(.5,.7));ln(A1,A2,IN,5,ph(.55,.75));for(const[p,n,dx,dy]of[[B1,'B₁',-12,16],[B2,'B₂',-12,-8],[A1,'A₁',12,16],[A2,'A₂',12,-8]])pt(p,'#334155',ph(.7,.78),n,dx,dy);if(T>.8)txs('A₁A₂ = B₁B₂',12,26)}},
+{g:1,n:'Перпендикуляр до будь-якої прямої',t:.85,d:.78,x:'Повертайте пряму x у площині',ct:[0,0,1.5],
+c:[[.3,'Нехай a ⟂ α.','Пряма a стоїть на площині.'],[.7,'Проведемо в α через основу a прямі x₁, x₂, x₃.','Ось прямі x₁, x₂, x₃ у площині.'],[9,'a ⟂ кожної такої прямої. Повертайте пряму x — кут завжди 90°.','Перпендикуляр до кожної! Крути x.']],
+i:'<b>Теорема.</b> Якщо пряма перпендикулярна до площини, то вона перпендикулярна до будь-якої прямої, що лежить у цій площині й проходить через точку її перетину: a ⟂ α ⇒ a ⟂ x₁, x₂, …, xₙ.',
+f(){fl(ph(0,.1));ln([0,0,-1.6],[0,0,4.6],OUT,4,ph(.1,.3));if(T>.3)tx('a',[0,0,4.9],8,0,OUT);[.3,1.2,2.1].forEach((an,i)=>{const d=[Math.cos(an),Math.sin(an),0],t0=.3+.13*i;L2(O,d,3.8,3.8,IN,ph(t0,t0+.1));rt(O,Z,d,GN,ph(t0+.1,t0+.15));if(T>t0+.1)tx('x'+'₁₂₃'[i],mul(d,4.1),0,0,IN)});
+pt(O,OUT,ph(.28,.34),'O',-12,18);const dx=[Math.cos(U*PI),Math.sin(U*PI),0];if(T>.8||ov!=null){L2(O,dx,3.8,3.8,AM,1);rt(O,Z,dx,GN,1);tx('x',mul(dx,4.1),0,0,AM)}}},
+{g:1,n:'Ознака перпендикулярності',t:.9,ct:[0,0,1.5],
+c:[[.4,'Нехай a, b ⊂ α і a ∩ b = A.','Дві прямі в площині, що перетинаються.'],[.55,'Проведемо через A пряму c.','Ставимо пряму c.'],[.8,'c ⟂ a і c ⟂ b.','Вона перпендикулярна обом.'],[9,'Тоді c ⟂ α — і до будь-якої прямої в α.','Тоді вона ⟂ усій площині!']],
+i:'<b>Ознака перпендикулярності прямої і площини.</b> Якщо пряма перпендикулярна до двох прямих, що лежать в одній площині й перетинаються, то вона перпендикулярна до цієї площини: a, b ⊂ α, a ∩ b = A, c ⟂ a, c ⟂ b ⇒ c ⟂ α.',
+f(){const da=[Math.cos(.35),Math.sin(.35),0],db=[Math.cos(1.95),Math.sin(1.95),0],dx=[Math.cos(2.8),Math.sin(2.8),0];fl(ph(0,.1));L2(O,da,3.8,3.8,IN,ph(.1,.25));L2(O,db,3.8,3.8,AM,ph(.25,.4));pt(O,OUT,ph(.35,.4),'A',-12,18);
+ln([0,0,-1.6],[0,0,4.6],OUT,4,ph(.45,.6));if(T>.6)tx('c',[0,0,4.9],8,0,OUT);rt(O,Z,da,GN,ph(.6,.7));rt(O,Z,db,GN,ph(.65,.75));if(T>.8){L2(O,dx,3.8,3.8,'#a855f7',ph(.8,.9));rt(O,Z,dx,GN,ph(.85,.9))}if(T>.1)tx('a',mul(da,4.1),0,0,IN);if(T>.25)tx('b',mul(db,4.1),0,0,AM)}},
+{g:1,n:'Паралельні прямі й перпендикуляр',t:.35,u:[.3,.8],x:'Вирівняйте пряму b',ct:[0,0,1.5],
+c:[[.3,'Нехай a ⟂ α, а пряма b нахилена до α.','Пряма a перпендикулярна, b — похила.'],[.8,'Повертаємо b до положення b ∥ a.','Вирівнюємо b паралельно a…'],[9,'Коли b ∥ a, пряма b ⟂ α. І навпаки: a ⟂ α, b ⟂ α ⇒ a ∥ b.','Паралельна — отже теж перпендикулярна!']],
+i:'<b>Зв’язок паралельності й перпендикулярності.</b> Якщо одна з двох паралельних прямих перпендикулярна до площини, то й друга перпендикулярна до неї. Якщо дві прямі перпендикулярні до однієї площини, то вони паралельні.',
+f(){const P1=[-1.8,0,0],P2=[1.8,.3,0],tau=.61*(1-U),db=[Math.sin(tau),0,Math.cos(tau)];fl(ph(0,.1));ln(sub(P1,mul(Z,1.4)),add(P1,mul(Z,4.6)),OUT,4,ph(.05,.2));rt(P1,Z,X,GN,ph(.2,.25));if(T>.2)tx('a',add(P1,[0,0,4.9]),8,0,OUT);
+ln(sub(P2,mul(db,1.4)),add(P2,mul(db,4.6)),AM,4,ph(.2,.3));if(T>.3)tx('b',add(P2,mul(db,4.9)),8,0,AM);if(tau<.03)rt(P2,db,X,GN,1);if(T>.3)txs(`∠(b, α) = ${Math.round(90-tau*57.3)}°`,12,26,tau<.03?GN:AM)}},
+{g:2,n:'Кут між прямою та площиною',t:.7,d:.5,x:'Змінюйте кут нахилу (0°–90°)',u:[.3,.85],ct:[1.5,0,1],
+c:[[.3,'Нехай пряма перетинає α й не перпендикулярна до неї.','Пряма «встромлена» в площину.'],[.5,'Її проєкція на α — пряма, що проходить через точку перетину.','Це тінь прямої на площині.'],[.65,'Кут φ між прямою та її проєкцією — це кут між прямою й площиною.','Кут між прямою та її тінню.'],[9,'0° ≤ φ ≤ 90°: φ = 0° для паралельної прямої, φ = 90° для перпендикулярної.','Змінюй нахил від 0° до 90°!']],
+i:'<b>Кут між прямою та площиною.</b> Якщо пряма паралельна площині або належить їй, кут дорівнює 0°; якщо перпендикулярна — 90°. Якщо пряма перетинає площину й не перпендикулярна до неї, то кутом називають кут між прямою та її проєкцією на площину. Завжди 0° ≤ φ ≤ 90°.',
+f(){const az=.6,h=[Math.cos(az),Math.sin(az),0],f0=ov!=null?ov*PI/2:.2+1.1*U,c=Math.cos(f0),s=Math.sin(f0),dir=[c*h[0],c*h[1],s],P=mul(dir,3.8),F=[P[0],P[1],0],deg=Math.round(f0*180/PI);fl(ph(0,.1));ln(mul(dir,-1.6),mul(dir,4.6),OUT,4,ph(.05,.25));pt(O,OUT,ph(.2,.28),'O',-12,18);
+if(T>.3){ln(mul(h,-1.6*c),mul(h,4.6*c),IN,4,ph(.3,.45));ln(P,F,'#94a3b8',2,ph(.35,.45),[4,3]);rt(F,Z,mul(h,-1),GN,ph(.4,.5));pt(F,IN,ph(.4,.45))}
+if(T>.5){arc(O,h,dir,GN,1.7,'φ',1);txs(deg<2?'φ = 0°: пряма ∥ α':deg>88?'φ = 90°: пряма ⟂ α':`φ = ${deg}°`,12,26)}}},
+{g:2,n:'Приклад: куб',t:.9,ct:[1.5,1.5,1.5],
+c:[[.2,'Куб ABCDA₁B₁C₁D₁.','Ось куб.'],[.35,'Площина ABC — основа куба.','Основа — площина ABC.'],[.5,'Розглянемо діагональ AB₁ грані AA₁B₁B.','Беремо діагональ AB₁.'],[.7,'Проєкція AB₁ на площину ABC — пряма AB.','Її проєкція — ребро AB.'],[9,'Кут між AB₁ і ABC дорівнює ∠B₁AB = 45° (AA₁B₁B — квадрат).','Квадрат — отже 45°!']],
+i:'<b>Приклад: куб ABCDA₁B₁C₁D₁.</b> Проєкція прямої AB₁ на площину ABC — пряма AB, тож кут між AB₁ і площиною ABC дорівнює ∠B₁AB. Оскільки AA₁B₁B — квадрат, ∠B₁AB = 45°.',
+f(){const V=CV;fp([V.A,V.B,V.C,V.D],PA,ph(.2,.35));for(const e of['A B','B C','C D','D A','A1 B1','B1 C1','C1 D1','D1 A1','A A1','B B1','C C1','D D1']){const[a,b]=e.split(' ');ln(V[a],V[b],'#64748b',1.5,ph(.02,.2))}
+if(T>.1)for(const n in V)tx(n.replace('1','₁'),V[n],0,V[n][2]>1?-9:20,'#475569',16);ln(V.A,V.B1,OUT,4,ph(.35,.5));ln(V.A,V.B,IN,4,ph(.5,.65));ln(V.B,V.B1,GN,3,ph(.5,.65),[4,3]);rt(V.B,Z,[-1,0,0],GN,ph(.6,.7));arc(V.A,X,[1,0,1],OUT,1.3,'45°',ph(.7,.85))}},
+{g:2,n:'Двогранний кут і лінійний кут',t:.8,d:.6,u:[.4,.8],x:'Змінюйте розхил граней',ct:[0,0,1.5],
+c:[[.2,'Дві півплощини зі спільною межею утворюють двогранний кут.','Розкрита книжка — двогранний кут.'],[.4,'Спільна межа — ребро MN.','Корінець — ребро MN.'],[.7,'Через точку O ребра проведемо промені OA і OB у гранях, перпендикулярні до ребра.','Ставимо O і два промені ⟂ ребру.'],[9,'∠AOB — лінійний кут; величина двогранного кута дорівнює його величині.','Кут AOB — міра двогранного!']],
+i:'<b>Двогранний кут і лінійний кут.</b> Двогранний кут утворений двома півплощинами зі спільною межею — ребром. Лінійний кут: на ребрі MN беремо точку O, у гранях проводимо промені OA ⟂ MN і OB ⟂ MN; ∠AOB — лінійний кут. Величина двогранного кута дорівнює величині його лінійного кута.',
+f(){const th=(40+110*U)*PI/180,d1=[-Math.sin(th/2),0,Math.cos(th/2)],d2=[Math.sin(th/2),0,Math.cos(th/2)],M=[0,-3,0],N=[0,3,0],Oo=[0,.3,0];
+fp([M,N,add(N,mul(d1,4)),add(M,mul(d1,4))],PY,ph(.05,.2));fp([M,N,add(N,mul(d2,4)),add(M,mul(d2,4))],PA,ph(.05,.2));fp(Q([0,.3,1.6],X,Z,3.6,2.4),PG,ph(.6,.72));
+ln(M,N,OUT,5,ph(.2,.3));if(T>.3){tx('M',M,-12,16,OUT);tx('N',N,12,-8,OUT)}pt(Oo,OUT,ph(.38,.45),'O',-14,18);ln(Oo,add(Oo,mul(d1,3.4)),GN,4,ph(.45,.6));ln(Oo,add(Oo,mul(d2,3.4)),GN,4,ph(.5,.65));
+rt(Oo,Y,d1,GN,ph(.55,.65));rt(Oo,Y,d2,GN,ph(.6,.7));if(T>.6){tx('A',add(Oo,mul(d1,3.7)),-8,-4,GN);tx('B',add(Oo,mul(d2,3.7)),8,-4,GN)}arc(Oo,d1,d2,OUT,1.7,Math.round(th*180/PI)+'°',ph(.72,.85))}},
+{g:2,n:'Кут між площинами',t:.8,d:.6,u:[.5,.8],x:'Змінюйте кут між площинами',ct:[0,0,.8],
+c:[[.3,'Дві площини, що перетинаються, утворюють чотири двогранні кути.','Дві площини — чотири кути.'],[.7,'Їхні величини — θ та 180° − θ.','Два рівні й два доповнювальні.'],[9,'Кутом між площинами вважають той, що не більший за 90°.','Беремо менший — не більший за 90°!']],
+i:'<b>Кут між площинами.</b> Дві площини, що перетинаються, утворюють чотири двогранні кути; кутом між площинами називають той із них, що не більший за 90°. Кут між паралельними площинами дорівнює 0°.',
+f(){const th=(25+130*U)*PI/180,dB=[Math.cos(th),0,Math.sin(th)],dg=Math.round(th*180/PI);fp(Q(O,X,Y,4,3),PA,ph(.05,.2));fp(Q(O,Y,dB,3,4),PY,ph(.15,.3));ln([0,-3,0],[0,3,0],OUT,4,ph(.25,.35));
+arc(O,X,dB,OUT,1.4,dg+'°',ph(.4,.55));arc(O,dB,[-1,0,0],'#64748b',2.2,(180-dg)+'°',ph(.55,.7));if(T>.7)txs(`Кут між площинами = ${Math.min(dg,180-dg)}°`,12,26)}},
+{g:3,n:'Ознака перпендикулярності площин',t:.8,u:[.45,.85],x:'Обертайте площину β навколо a',ct:[0,0,1.5],
+c:[[.3,'Нехай пряма a перпендикулярна до площини α.','Пряма a ⟂ α.'],[.6,'Проведемо через a площину β.','Проводимо площину через a.'],[9,'β ⟂ α, яким би не було положення β навколо a.','Крути β — стіна завжди ⟂ підлозі!']],
+i:'<b>Ознака перпендикулярності площин.</b> Якщо одна з двох площин проходить через пряму, перпендикулярну до іншої площини, то ці площини перпендикулярні: a ⊂ β, a ⟂ α ⇒ β ⟂ α.',
+f(){const psi=.3+2.6*U,e=[Math.cos(psi),Math.sin(psi),0];fl(ph(0,.1));fp(Q([0,0,1.8],e,Z,3.6,2.6),PB,ph(.3,.5));ln([0,0,-1.2],[0,0,4.6],OUT,4,ph(.05,.25));if(T>.25)tx('a',[0,0,4.9],8,0,OUT);
+L2(O,e,3.6,3.6,AM,ph(.5,.65));rt(O,Z,e,GN,ph(.6,.7));pt(O,OUT,ph(.2,.28));if(T>.5)tx('β',add([0,0,4],mul(e,3)),0,0,'#7c3aed');if(T>.75)txs('α ⟂ β',12,26)}},
+{g:3,n:'Властивість перпендикулярних площин',t:.5,u:[.3,.8],x:'Повертайте пряму n у площині ψ',ct:[0,0,1.6],
+c:[[.3,'Нехай φ ⟂ ψ, їх перетин — пряма l.','Стіна й підлога, лінія стику — l.'],[.8,'У площині ψ проводимо пряму n і повертаємо її до положення n ⟂ l.','Крутимо n у стіні…'],[9,'Коли n ⟂ l, пряма n ⟂ φ.','n ⟂ l ⇒ n стоїть на підлозі прямо!']],
+i:'<b>Властивість перпендикулярних площин.</b> Якщо пряма, що лежить в одній із двох перпендикулярних площин, перпендикулярна до лінії їхнього перетину, то вона перпендикулярна й до другої площини: φ ⟂ ψ, φ ∩ ψ = l, n ⊂ ψ, n ⟂ l ⇒ n ⟂ φ.',
+f(){const ok=U>.985,gg=ok?PI/2:(35+55*U)*PI/180,dd=[Math.cos(gg),0,Math.sin(gg)],Pn=[.8,0,0];fp(Q([0,0,2],X,Z,4.2,2.8),PB,ph(.05,.2));fp(Q(O,X,Y,5.5,3.8),PA,ph(0,.1));tx('ψ',[3.8,0,4.6],0,0,'#7c3aed');tx('φ',[5,-3.2,0],0,0,IN);
+ln([-4.2,0,0],[4.2,0,0],OUT,4,ph(.2,.3));if(T>.3){tx('l',[4.5,0,0],8,0,OUT);ln(sub(Pn,mul(dd,.8)),add(Pn,mul(dd,4.4)),AM,4,1);pt(Pn,OUT,1);arc(Pn,X,dd,AM,1.2,Math.round(gg*180/PI)+'°',1);tx('n',add(Pn,mul(dd,4.7)),8,0,AM);if(ok){rt(Pn,dd,X,GN,1);rt(Pn,dd,Y,GN,1);txs('n ⟂ l  ⇒  n ⟂ φ',12,26,GN)}}}},
+{g:3,n:'Задача',t:.95,ct:[2,1.5,1.2],
+c:[[.25,'△ABC: ∠A = 90°.','Трикутник ABC у площині.'],[.45,'MB ⟂ ABC; MB = 4, AC = 6, MC = 10.','Над B піднімаємо MB.'],[.6,'Розглянемо площину AMC.','Площина AMC.'],[.78,'AB ⟂ AC; MA ⟂ AC, бо MA² + AC² = MC² (8² + 6² = 10²).','AB ⟂ AC та MA ⟂ AC.'],[9,'∠MAB — лінійний кут: cos = AB/MA = √3/2, тож кут між площинами ABC і AMC дорівнює 30°.','Відповідь: 30°!']],
+i:'<b>Задача.</b> △ABC (∠A = 90°) і △ABM (∠B = 90°) мають спільний катет AB; MB ⟂ ABC; MB = 4 см, AC = 6 см, MC = 10 см. Знайдіть кут між площинами ABC і AMC.<br><b>Розв’язання.</b> BC² = MC² − MB² = 84; AB² = BC² − AC² = 48; MA² = MB² + AB² = 64, MA = 8. Оскільки MA² + AC² = MC², MA ⟂ AC; також AB ⟂ AC. Тож ∠MAB — лінійний кут двогранного кута при ребрі AC: cos ∠MAB = AB/MA = √3/2, ∠MAB = 30°.',
+f(){const A=O,B=[4.16,0,0],C=[0,3.6,0],M=[4.16,0,2.4],gr='#64748b';fp([A,B,C],PA,ph(.05,.2));fp([A,M,C],PY,ph(.45,.6));ln(A,B,gr,2,ph(.05,.15));ln(B,C,gr,2,ph(.1,.2));ln(A,C,gr,2,ph(.15,.25));ln(B,M,OUT,4,ph(.25,.45));ln(A,M,gr,2,ph(.45,.55));ln(M,C,gr,2,ph(.5,.6));
+if(T>.2)for(const[p,n,dx,dy]of[[A,'A',-12,18],[B,'B',12,16],[C,'C',-12,-6]])tx(n,p,dx,dy);if(T>.45){tx('M',M,-12,-8);tx('4',lerp(B,M,.5),12,0,OUT);tx('10',lerp(M,C,.5),10,-6)}if(T>.2)tx('6',lerp(A,C,.5),-12,0);
+rt(A,X,Y,GN,ph(.62,.72));rt(A,M,Y,AM,ph(.68,.78),.7);arc(A,X,M,OUT,1.4,'30°',ph(.8,.92));if(T>.8)txs('cos∠MAB = AB/MA = √3/2  ⇒  30°',12,26)}}];
+const GR=['Паралельність','Перпендикулярність прямої й площини','Кути в просторі','Перпендикулярність площин'];
+const Qz=[['Скільки прямих, паралельних даній, можна провести через точку поза нею?',['Жодної','Одну','Безліч'],1,'Теорема існування й єдиності паралельної прямої.'],
+['Прямі a і b паралельні прямій c. Що можна сказати про a і b?',['Вони перетинаються','Вони паралельні','Вони мимобіжні'],1,'Ознака паралельності прямих.'],
+['Пряма b ⊄ α і паралельна прямій a ⊂ α. Тоді…',['b ∥ α','b перетинає α','b ⟂ α'],0,'Ознака паралельності прямої й площини.'],
+['Кут між прямою та площиною не перевищує…',['45°','90°','180°'],1,'0° ≤ φ ≤ 90°.'],
+['Пряма a ⟂ α. Яке твердження правильне?',['a ⟂ кожній прямій з α, що проходить через основу a','a ∥ α','a перетинає лише одну пряму з α'],0,'Пряма, перпендикулярна до площини, перпендикулярна до всіх її прямих, що проходять через точку перетину.'],
+['Кут між площинами ABC і AMC у задачі дорівнює…',['30°','45°','60°'],0,'cos ∠MAB = AB/MA = √3/2.'],
+['Кут між двома площинами, що перетинаються, — це…',['менший з двогранних кутів (≤ 90°)','завжди тупий кут','180°'],0,'Береться той із двогранних кутів, що не більший за 90°.']];
+$('qz').innerHTML=Qz.map((x,i)=>`<div class="q"><b>${i+1}. ${x[0]}</b>${x[1].map((o,j)=>`<button onclick="ans(this,${i},${j})">${o}</button>`).join('')}<small></small></div>`).join('');
+function ans(b,i,j){const ok=j==Qz[i][2];b.classList.add(ok?'ok':'no');b.parentNode.querySelector('small').textContent=(ok?'Так. ':'Ні. ')+Qz[i][3]}
+$('tabs').innerHTML=GR.map((n,i)=>`<button data-i="${i}" onclick="setSc(${SC.findIndex(s=>s.g==i)})">${n}</button>`).join('');
+function setSc(i){cs=i;T=0;ov=null;ct='';play=true;const s=SC[i];$('pl').textContent='⏸ Пауза';$('ex').value=s.d??.5;$('xs').style.display=s.x?'':'none';$('xt').textContent=s.x||'';
+[...$('tabs').children].forEach(b=>b.classList.toggle('on',b.dataset.i==s.g));$('sub').innerHTML=SC.map((q,k)=>q.g==s.g?`<button data-j="${k}" class="${k==i?'on':''}" onclick="setSc(${k})">${q.n}</button>`:'').join('');$('info').innerHTML=s.i}
+function setMode(j){J=!!j;document.body.classList.toggle('j',J);$('m0').classList.toggle('on',!J);$('m1').classList.toggle('on',J)}
+function size(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;W=r.width;H=Math.round(W*(W<640?1:.62));cv.style.height=H+'px';cv.width=W*d;cv.height=H*d;g.setTransform(d,0,0,d,0,0)}
+addEventListener('resize',size);
+cv.onpointerdown=e=>{drag=[e.clientX,e.clientY];cv.setPointerCapture(e.pointerId)};
+cv.onpointermove=e=>{if(!drag)return;yaw+=(e.clientX-drag[0])*.008;if(e.pointerType=='mouse')pit=cl(pit+(e.clientY-drag[1])*.006,.1,1.3);drag=[e.clientX,e.clientY]};
+cv.onpointerup=cv.onpointercancel=()=>{drag=null};
+$('pl').onclick=()=>{play=!play;if(play){ov=null;$('ex').value=SC[cs].d??.5}$('pl').textContent=play?'⏸ Пауза':'▶ Пуск'};$('sl').oninput=e=>{T=+e.target.value;ov=null};
+$('ex').oninput=e=>{ov=+e.target.value;T=SC[cs].t;play=false;$('pl').textContent='▶ Пуск'};
+function host(m){const x=34,y=H-12-(T>.95?Math.abs(Math.sin(clock*8))*10:0),tk=clock-capAt<1.6&&Math.sin(clock*12)>0;g.save();g.strokeStyle='#111';g.lineWidth=3;g.lineCap='round';g.beginPath();g.moveTo(x,y-45);g.lineTo(x,y-22);g.lineTo(x-9,y);g.moveTo(x,y-22);g.lineTo(x+9,y);g.moveTo(x,y-40);g.lineTo(x+13,y-28);g.moveTo(x,y-40);g.lineTo(x-13,y-52+Math.sin(clock*4)*7);g.stroke();
+g.beginPath();g.arc(x,y-54,10,0,7);g.fillStyle='#fff';g.fill();g.stroke();g.fillStyle='#111';for(const o of[-3.5,3.5]){g.beginPath();g.arc(x+o,y-55,1.8,0,7);g.fill()}
+if(tk){g.beginPath();g.ellipse(x,y-50,3,3.2,0,0,7);g.fill()}else{g.beginPath();g.arc(x,y-52,3.5,.2,PI-.2);g.lineWidth=1.6;g.stroke()}
+g.font='13px system-ui,sans-serif';const mw=Math.min(210,W*.55),ls=[];let cur='';for(const s of m.split(' ')){const t=cur?cur+' '+s:s;if(g.measureText(t).width>mw-14&&cur){ls.push(cur);cur=s}else cur=t}ls.push(cur);
+const bh=ls.length*16+10,bx=x+26,by=y-54-bh/2;g.fillStyle='#fff';g.strokeStyle='#2b7fd8';g.lineWidth=2;g.beginPath();g.roundRect(bx,by,mw,bh,10);g.fill();g.stroke();g.fillStyle='#0f172a';g.textAlign='left';ls.forEach((l,i)=>g.fillText(l,bx+7,by+17+i*16));g.restore()}
+function draw(){const st=getComputedStyle(document.documentElement),s=SC[cs];FG=st.getPropertyValue('--fg').trim();CD=st.getPropertyValue('--card').trim();
+sw+=((drag||!$('au').checked?0:1)-sw)*.08;const yw=yaw+.3*sw*Math.sin(clock*.5);cy=Math.cos(yw);sy=Math.sin(yw);cp=Math.cos(pit);sp=Math.sin(pit);S=Math.min(W/13,H/9)*(s.z||1);CT=s.ct;
+U=ov!=null?ov:(s.u?ph(s.u[0],s.u[1]):(s.d??.5));g.clearRect(0,0,W,H);s.f();
+let i=s.c.findIndex(x=>T<x[0]);if(i<0)i=s.c.length-1;const t=s.c[i][1];if(t!=ct){ct=t;capAt=clock;$('cap').textContent=t}if(J)host(s.c[i][2])}
+function fr(n){const d=Math.min(.05,(n-last)/1000);last=n;clock+=d;if(play){T+=d/16;if(T>1.12){if($('all').checked)setSc((cs+1)%SC.length);else T=0}}$('sl').value=Math.min(T,1);draw();requestAnimationFrame(fr)}
+size();setMode(0);setSc(0);requestAnimationFrame(fr);
+</script></body></html>
