@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Перпендикуляр і похилі до площини</title>
+<style>
+:root{--bg:#f1f5f9;--fg:#0f172a;--mut:#64748b;--card:#fff;--bd:#e2e8f0;--acc:#2563eb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--fg:#f1f5f9;--mut:#94a3b8;--card:#162033;--bd:#2b3a55;--acc:#60a5fa}}
+:root[data-theme="dark"]{--bg:#0b1220;--fg:#f1f5f9;--mut:#94a3b8;--card:#162033;--bd:#2b3a55;--acc:#60a5fa}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:14px}
+#w{max-width:960px;margin:0 auto}
+h1{font-size:21px;margin:2px 0 10px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.tabs button,.ctl button{font:inherit;font-weight:600;padding:8px 14px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--fg);cursor:pointer}
+.tabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px}
+canvas{width:100%;display:block;touch-action:none;cursor:grab}
+#cap{margin-top:8px;background:rgba(15,23,42,.8);color:#fff;border-radius:10px;padding:8px 12px;font-size:15px;min-height:3.2em}@media(max-width:640px){#cap{min-height:5.2em}}
+.ctl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.ctl input[type=range]{flex:1;min-width:140px}.ctl label{font-size:14px;color:var(--mut)}
+#info{margin-top:4px;padding:12px 14px}.k{font-size:13px;color:var(--mut);margin:6px 2px}
+</style></head><body><div id="w">
+<h1>Перпендикуляр і похилі до площини</h1>
+<div class="tabs" id="tabs"></div>
+<div class="card"><canvas id="cv"></canvas><div id="cap"></div></div>
+<div class="ctl"><button id="pl">⏸ Пауза</button><input type="range" id="sc" min="0" max="1" step="0.001" value="0"><label><input type="checkbox" id="au" checked> рух камери</label></div>
+<div class="card" id="info"></div>
+<p class="k">Перетягуйте сцену, щоб обертати. Повзунок перемотує «відео». Довжини на малюнку — в умовних одиницях.</p>
+</div>
+<script>
+const $=i=>document.getElementById(i),cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),ez=x=>x*x*(3-2*x);
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],mul=(a,k)=>[a[0]*k,a[1]*k,a[2]*k],nm=a=>Math.hypot(...a),nrm=a=>mul(a,1/nm(a)),lerp=(a,b,k)=>add(a,mul(sub(b,a),k)),avg=a=>mul(a.reduce((s,p)=>add(s,p),[0,0,0]),1/a.length);
+const h=4,PI=Math.PI,T2=2*PI,O3=[0,0,0],A3=[0,0,h],K=[0,0,1],ub=a=>[Math.cos(a),Math.sin(a),0],pt=(r,a)=>mul(ub(a),r);
+const INFO=['<b>Перпендикуляр</b> AO — відрізок від точки A до площини α, перпендикулярний до α (O — основа перпендикуляра). <b>Похила</b> AB — будь-який інший відрізок від A до точки B площини. <b>Проєкція похилої</b> — відрізок OB, що сполучає основу перпендикуляра й основу похилої.',
+'Якщо з однієї точки, взятої поза площиною, проведено до цієї площини перпендикуляр і похилі, то проєкції рівних похилих рівні. (З △AOB: OB² = AB² − AO², а AO — спільний катет.)',
+'З двох похилих, проведених з однієї точки, більша та, проєкція якої більша. І навпаки: більша похила має більшу проєкцію.',
+'Перпендикуляр коротший за будь-яку похилу, проведену з тієї самої точки: AB² = AO² + OB² > AO².',
+'<b>Теорема про три перпендикуляри.</b> Пряма a на площині α, перпендикулярна до проєкції OB похилої AB, перпендикулярна й до самої похилої. І навпаки, якщо a ⟂ AB, то a ⟂ OB. Три перпендикуляри: ① AO ⊥ α, ② a ⟂ OB, ③ a ⟂ AB.'];
+const NAMES=['Перпендикуляр, похила, проєкція','Рівні похилі → рівні проєкції','Більша похила — більша проєкція','Перпендикуляр коротший за похилу','Теорема про три перпендикуляри'];
+const CAP=[[[.15,'Є площина α і точка A поза нею.'],[.4,'З точки A проведемо до площини перпендикуляр AO: O — його основа.'],[.6,'Проведемо похилу AB — відрізок від A до будь-якої іншої точки B площини.'],[.82,'Відрізок OB, що сполучає основи перпендикуляра й похилої, — проєкція похилої.'],[9,'AO — перпендикуляр, AB — похила, OB — проєкція похилої на площину α.']],
+[[.1,'Площина α, точка A поза нею й перпендикуляр AO.'],[.75,'Проводимо рівні похилі AB₁, AB₂, AB₃, AB₄ та їхні проєкції.'],[.92,'Кінці рівних похилих лежать на колі із центром O.'],[9,'Проєкції рівних похилих рівні: △AOBᵢ рівні за гіпотенузою та катетом AO.']],
+[[.3,'Проводимо дві похилі AB₁ і AB₂ та їхні проєкції.'],[.9,'Рухаємо точку B₂: змінюється проєкція OB₂, а разом із нею й похила AB₂.'],[9,'З двох похилих більша та, проєкція якої більша (і навпаки).']],
+[[.25,'Беремо перпендикуляр AO і похилу AB.'],[.92,'Точка B рухається площиною: AB завжди — гіпотенуза прямокутного △AOB.'],[9,'Перпендикуляр коротший за будь-яку похилу: AB² = AO² + OB² > AO².']],
+[[.1,'Перпендикуляр AO, похила AB і проєкція OB.'],[.3,'AO ⊥ α, тому △AOB лежить у площині, перпендикулярній до α.'],[.65,'Проводимо в площині α пряму a через B і обертаємо її навколо B.'],[.88,'Коли a ⟂ OB, вона перпендикулярна й до похилої AB — і навпаки.'],[9,'AO ⊥ α, a ⟂ OB ⇒ a ⟂ AB; і навпаки: a ⟂ AB ⇒ a ⟂ OB.']]];
+const cv=$('cv'),g=cv.getContext('2d');let cs=0,T=0,play=true,drag=null,baseYaw=-.5,pitch=.5,clock=0,last=performance.now(),CW,CH,S,cy,sy,cp,sp,capI='',FG,CARD,DUR=18;
+const ctr=[0,0,1.8];
+$('tabs').innerHTML=NAMES.map((n,i)=>`<button data-i="${i}" onclick="setScene(${i})">${n}</button>`).join('');
+function setScene(i){cs=i;T=0;capI='';[...$('tabs').children].forEach(b=>b.classList.toggle('on',b.dataset.i==i));$('info').innerHTML=INFO[i]}
+function size(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;CW=r.width;CH=Math.round(CW*(CW<640?1:.62));cv.style.height=CH+'px';cv.width=CW*d;cv.height=CH*d;g.setTransform(d,0,0,d,0,0)}
+addEventListener('resize',size);
+cv.onpointerdown=e=>{drag=[e.clientX,e.clientY];cv.setPointerCapture(e.pointerId)};
+cv.onpointermove=e=>{if(!drag)return;baseYaw+=(e.clientX-drag[0])*.008;pitch=cl(pitch+(e.clientY-drag[1])*.006,.1,1.3);drag=[e.clientX,e.clientY]};
+cv.onpointerup=()=>{drag=null};
+$('pl').onclick=()=>{play=!play;$('pl').textContent=play?'⏸ Пауза':'▶ Пуск'};$('sc').oninput=e=>{T=+e.target.value};
+const ph=(a,b)=>ez(cl((T-a)/(b-a))),toV=p=>{const x=p[0]-ctr[0],y=p[1]-ctr[1],z=p[2]-ctr[2],X=x*cy-y*sy,Y=x*sy+y*cy;return[X,z*cp+Y*sp,Y*cp-z*sp]},scr=v=>[CW/2+S*v[0],CH/2-S*v[1]];
+const mk=(pts,c)=>{const q=pts.map(toV);return{q,d:avg(q)[2],c}};
+function flush(it){it.sort((a,b)=>b.d-a.d);for(const f of it){g.beginPath();f.q.forEach((v,j)=>{const p=scr(v);j?g.lineTo(...p):g.moveTo(...p)});g.closePath();g.fillStyle=f.c;g.fill();g.strokeStyle=f.e?'rgba(37,99,235,.7)':f.c;g.lineWidth=f.e?1.5:.8;g.stroke()}}
+function base(extra){flush([{q:[[-5.5,-4,0],[5.5,-4,0],[5.5,4,0],[-5.5,4,0]].map(toV),d:1e3,c:'rgba(96,165,250,.22)',e:1},...(extra||[])]);tx('α',toV([5.1,-3.5,0]),0,0,'#2563eb')}
+function seg(a,b,col,wd,dash){const p=scr(toV(a)),q=scr(toV(b));g.beginPath();g.setLineDash(dash||[]);g.moveTo(...p);g.lineTo(...q);g.strokeStyle=col;g.lineWidth=wd;g.stroke();g.setLineDash([])}
+function poly(pts,col,w,dash){g.beginPath();pts.forEach((p,i)=>{const q=scr(toV(p));i?g.lineTo(...q):g.moveTo(...q)});g.setLineDash(dash||[]);g.strokeStyle=col;g.lineWidth=w;g.stroke();g.setLineDash([])}
+function tx(t,v,dx,dy,col){const p=scr(v);g.font='bold 16px system-ui,sans-serif';g.textAlign='center';g.lineWidth=4;g.strokeStyle=CARD;g.strokeText(t,p[0]+dx,p[1]+dy);g.fillStyle=col||FG;g.fillText(t,p[0]+dx,p[1]+dy)}
+function txs(t,x,y,col){g.font='bold 15px system-ui,sans-serif';g.textAlign='left';g.lineWidth=4;g.strokeStyle=CARD;g.strokeText(t,x,y);g.fillStyle=col||FG;g.fillText(t,x,y)}
+function dpt(p,col,r=6){const q=scr(toV(p));g.beginPath();g.arc(q[0],q[1],r,0,7);g.fillStyle=col;g.fill();g.strokeStyle=FG;g.lineWidth=1.5;g.stroke()}
+function ra(V,d1,d2,s,col){poly([add(V,mul(d1,s)),add(add(V,mul(d1,s)),mul(d2,s)),add(V,mul(d2,s))],col,2.2)}
+function pts3(){dpt(A3,FG,6);tx('A',toV(A3),-12,-8);dpt(O3,FG,5);tx('O',toV(O3),-12,16)}
+function s0(){const B=[2.8,1.6,0],kT=ph(.82,.95),kA=ph(.05,.15),kP=ph(.2,.4),kB=ph(.42,.6),kR=ph(.62,.8);
+base(kT>0?[mk([A3,O3,B],`rgba(249,115,22,${.3*kT})`)]:[]);
+if(kA>0)dpt(A3,FG,6*kA);if(kA>.9)tx('A',toV(A3),-12,-8);
+if(kP>0)seg(A3,lerp(A3,O3,kP),'#dc2626',5);
+if(kP>.95){dpt(O3,FG,5);tx('O',toV(O3),-12,16);ra(O3,K,nrm(B),.5,'#dc2626');tx('перпендикуляр AO',toV(lerp(A3,O3,.5)),-66,0,'#dc2626')}
+if(kB>0)seg(A3,lerp(A3,B,kB),'#16a34a',5);
+if(kB>.95){dpt(B,FG,5);tx('B',toV(B),10,16);tx('похила AB',toV(lerp(A3,B,.55)),48,-4,'#16a34a')}
+if(kR>0)seg(O3,lerp(O3,B,kR),'#2563eb',5);
+if(kR>.95)tx('проєкція OB',toV(lerp(O3,B,.5)),0,22,'#2563eb')}
+function s1(){const AN=[.3,1.75,3.3,4.8],rho=3;base();seg(A3,O3,'#dc2626',4);pts3();
+AN.forEach((a,i)=>{const B=pt(rho,a),k=ph(.08+.17*i,.22+.17*i),k2=ph(.14+.17*i,.27+.17*i);
+if(k>0)seg(A3,lerp(A3,B,k),'#16a34a',4);if(k2>0)seg(O3,lerp(O3,B,k2),'#2563eb',4);if(k>.95){dpt(B,FG,5);tx('B'+'₁₂₃₄'[i],toV(B),10,16)}});
+const kc=ph(.78,.92);if(kc>0)poly(Array.from({length:61},(_,i)=>pt(rho,T2*kc*i/60)),'#a855f7',3,[7,5]);
+if(T>.75){txs('AB₁ = AB₂ = AB₃ = AB₄ = 5',12,26,'#16a34a');txs('OB₁ = OB₂ = OB₃ = OB₄ = 3',12,48,'#2563eb')}}
+function s2(){base();const r1=2.2,r2=1.2+2.6*cl((T-.35)/.55),B1=pt(r1,3.6),B2=pt(r2,.5),k1=ph(.05,.2),k2=ph(.2,.35);seg(A3,O3,'#dc2626',4);pts3();
+if(k1>0){seg(A3,lerp(A3,B1,k1),'#16a34a',4);seg(O3,lerp(O3,B1,k1),'#2563eb',4)}
+if(k2>0){seg(A3,lerp(A3,B2,k2),'#d97706',4);seg(O3,lerp(O3,B2,k2),'#0891b2',4)}
+if(k1>.95){dpt(B1,FG,5);tx('B₁',toV(B1),10,16)}if(k2>.95){dpt(B2,FG,5);tx('B₂',toV(B2),10,16)}
+const f=x=>x.toFixed(2),l1=Math.hypot(h,r1),l2=Math.hypot(h,r2);
+if(T>.3){txs(`OB₁ = ${f(r1)}    AB₁ = ${f(l1)}`,12,26,'#16a34a');txs(`OB₂ = ${f(r2)}    AB₂ = ${f(l2)}`,12,48,'#d97706');const s=Math.abs(r2-r1)<.04?'=':r2<r1?'<':'>';txs(`OB₂ ${s} OB₁   ⇒   AB₂ ${s} AB₁`,12,72)}}
+function s3(){const u0=cl((T-.25)/.67),r=.5+3.2*u0,a=.4+4.4*u0,B=pt(r,a);base([mk([A3,O3,B],'rgba(249,115,22,.28)')]);
+if(u0>0)poly(Array.from({length:41},(_,i)=>pt(.5+3.2*u0*i/40,.4+4.4*u0*i/40)),'#a855f7',2.5,[6,5]);
+seg(A3,O3,'#dc2626',5);seg(A3,B,'#16a34a',5);seg(O3,B,'#2563eb',4);ra(O3,K,nrm(B),.5,'#dc2626');pts3();dpt(B,FG,5);tx('B',toV(B),10,16);
+txs('AO = '+h.toFixed(2)+'  (перпендикуляр)',12,26,'#dc2626');txs('AB = '+Math.hypot(h,r).toFixed(2)+'  (похила)',12,48,'#16a34a');txs('AB² = AO² + OB²  ⇒  AB > AO',12,72)}
+function s4(){const ang=.9,u=ub(ang),v=[-Math.sin(ang),Math.cos(ang),0],rho=3.2,B=mul(u,rho),L=Math.hypot(h,rho),kT=ph(.1,.25),kA=ph(.25,.35),
+thd=T<.3?40:T<.65?40+110*ph(.3,.65):T<.88?150-60*ph(.65,.88):90,th=thd*PI/180,d=add(mul(u,Math.cos(th)),mul(v,Math.sin(th)));
+base([mk([A3,O3,B],`rgba(249,115,22,${.3*kT})`)]);seg(A3,O3,'#dc2626',5);seg(O3,B,'#2563eb',5);seg(A3,B,'#16a34a',5);pts3();dpt(B,FG,5);tx('B',toV(B),10,16);ra(O3,K,u,.5,'#dc2626');
+if(kA>0){seg(sub(B,mul(d,3*kA)),add(B,mul(d,3*kA)),'#a855f7',4);if(kA>.9)tx('a',toV(add(B,mul(d,3.3))),8,-6,'#a855f7')}
+if(kA>.9&&Math.abs(thd-90)<2){ra(B,mul(u,-1),d,.5,'#2563eb');ra(B,nrm(sub(A3,B)),d,.8,'#16a34a')}
+if(kA>.9){const a1=Math.acos(Math.min(1,Math.abs(Math.cos(th))))*180/PI,a2=Math.acos(Math.min(1,Math.abs(rho*Math.cos(th))/L))*180/PI;
+txs(`∠(a, OB) = ${a1.toFixed(0)}°`,12,26,'#2563eb');txs(`∠(a, AB) = ${a2.toFixed(0)}°`,12,48,'#16a34a')}
+if(T>.9){txs('① AO ⊥ α',12,76,'#dc2626');txs('② a ⟂ OB',12,98,'#2563eb');txs('③ a ⟂ AB',12,120,'#16a34a')}}
+function caption(){const l=CAP[cs],t=l.find(x=>T<x[0])[1];if(t!=capI){capI=t;$('cap').textContent=t}}
+function draw(){const st=getComputedStyle(document.documentElement);FG=st.getPropertyValue('--fg').trim();CARD=st.getPropertyValue('--card').trim();
+const yaw=baseYaw+($('au').checked&&!drag?.3*Math.sin(clock*.5):0);cy=Math.cos(yaw);sy=Math.sin(yaw);cp=Math.cos(pitch);sp=Math.sin(pitch);
+S=Math.min(CW/13,CH/9.5);g.clearRect(0,0,CW,CH);g.lineCap='round';[s0,s1,s2,s3,s4][cs]();caption()}
+function frame(n){const d=Math.min(.05,(n-last)/1000);last=n;clock+=d;if(play){T+=d/DUR;if(T>1.12)T=0}$('sc').value=Math.min(T,1);draw();requestAnimationFrame(frame)}
+size();setScene(0);requestAnimationFrame(frame);
+</script></body></html>
