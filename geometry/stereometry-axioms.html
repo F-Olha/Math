@@ -1,0 +1,167 @@
+<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Аксіоми стереометрії та наслідки з них</title>
+<style>
+:root{--bg:#f1f5f9;--fg:#0f172a;--mut:#64748b;--card:#fff;--bd:#cbd5e1;--acc:#1d4ed8;--grid:rgba(110,180,225,.32);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--fg:#f1f5f9;--mut:#94a3b8;--card:#162033;--bd:#2b3a55;--acc:#60a5fa;--grid:rgba(96,165,250,.14)}}
+:root[data-theme="dark"]{--bg:#0b1220;--fg:#f1f5f9;--mut:#94a3b8;--card:#162033;--bd:#2b3a55;--acc:#60a5fa;--grid:rgba(96,165,250,.14)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:14px}
+#w{max-width:960px;margin:0 auto}h1{font-size:19px;margin:2px 0 10px;text-align:center}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;align-items:center}
+button{font:inherit;font-weight:600;padding:7px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--fg);cursor:pointer}
+button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px;margin:8px 0}
+canvas{width:100%;display:block;touch-action:pan-y;cursor:grab;border-radius:10px}
+#cap{margin-top:8px;background:#1e293b;color:#fff;border-radius:10px;padding:8px 12px;font-size:15px;min-height:5.4em}
+label{font-size:14px;color:var(--mut)}input[type=range]{min-width:140px}
+.q button{display:block;width:100%;text-align:left;margin:4px 0}.q small{color:var(--mut)}.ok{background:#16a34a!important;color:#fff}.no{background:#dc2626!important;color:#fff}
+body.j{background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+body.j h1{text-transform:uppercase}body.j .card{border:2px solid #8fcdf3;border-radius:16px}body.j #cap{background:#1d6fd8}
+body.j canvas{background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+
+#info .k{display:block;margin-top:6px;color:var(--mut);font-size:14px}#info .k::before{content:"Приклад із життя: ";font-weight:700}
+body.j #info .k{background:rgba(125,196,244,.18);border:2px solid #8fcdf3;border-radius:10px;padding:6px 10px;color:var(--fg)}body.j #info .k::before{color:#1d6fd8}
+body.j h1::before{content:"✏️ "}body.j h1::after{content:" 💡"}
+</style></head><body><div id="w"><h1>Аксіоми стереометрії та наслідки з них</h1>
+<div class="row"><b>Стиль:</b><button id="m0" onclick="setMode(0)">🎓 Серйозно</button><button id="m1" onclick="setMode(1)">😄 Жартома</button></div>
+<div class="row" id="tabs"></div>
+<div class="card"><canvas id="cv"></canvas><div id="cap"></div></div>
+<div class="row"><button id="pl">⏸ Пауза</button><input type="range" id="sc" min="0" max="1" step="0.001" value="0" style="flex:1"><label><input type="checkbox" id="au" checked> рух камери</label><label><input type="checkbox" id="all"> усі сцени підряд</label></div>
+<div class="row"><label id="xs"><span id="xt"></span> <input type="range" id="ex" min="0" max="1" step="0.005" value="0"></label></div>
+<div class="card" id="info"></div>
+<details class="card"><summary><b>Перевір себе</b></summary><div id="qz"></div></details></div>
+<script>
+const $=i=>document.getElementById(i),cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),ez=x=>x*x*(3-2*x);
+const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],mul=(a,k)=>[a[0]*k,a[1]*k,a[2]*k],dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],nm=a=>Math.hypot(...a),nrm=a=>mul(a,1/nm(a)),lerp=(a,b,k)=>add(a,mul(sub(b,a),k)),avg=a=>mul(a.reduce((s,p)=>add(s,p),[0,0,0]),1/a.length);
+const PI=Math.PI,O3=[0,0,0],K=[0,0,1],ub=a=>[Math.cos(a),Math.sin(a),0];
+const PL=(c,a,b,x,y)=>[[1,1],[1,-1],[-1,-1],[-1,1]].map(([s,t])=>add(c,add(mul(a,x*s),mul(b,y*t))));
+const INFO=['<b>Аксіома C₁.</b> Яка б не була площина, існують точки, що належать цій площині, і точки, які їй не належать: A ∈ α, M ∉ α.<br><span class="k">🪰 Муха, що сидить на стіні, належить площині стіни; муха, що летить у кімнаті, — ні.</span>',
+'<b>Аксіома C₂.</b> Через будь-які три точки, які не лежать на одній прямій, можна провести площину, і до того ж тільки одну.<br><span class="k">🚲 Три точки дотику коліс триколісного велосипеда до підлоги визначають площину підлоги.</span>',
+'<b>Аксіома C₃.</b> Якщо дві різні точки прямої лежать у площині, то вся пряма лежить у цій площині: A ∈ α і B ∈ α ⇒ AB ⊂ α.<br><span class="k">🧱 Натягнутий шнур між двома точками на плоскій стіні лежить у площині стіни.</span>',
+'<b>Аксіома C₄.</b> Якщо дві різні площини мають спільну точку, то вони перетинаються по прямій, що проходить через цю точку: α ∩ β = a, A ∈ a.<br><span class="k">🏠 Дві стіни кімнати перетинаються по прямій — лінії стику в куті.</span>',
+'<b>Наслідок 1. Задання площини прямою і точкою.</b> Через пряму і точку, яка не лежить на ній, можна провести площину, і до того ж тільки одну.',
+'<b>Наслідок 2. Задання площини двома паралельними прямими.</b> Через дві паралельні прямі можна провести площину, і до того ж тільки одну: a ∥ b ⇒ a, b ⊂ α.',
+'<b>Наслідок 3. Задання площини двома прямими, що перетинаються.</b> Якщо дві різні прямі мають спільну точку, то через них можна провести площину, і до того ж тільки одну: m ∩ n = O ⇒ m, n ⊂ γ.'];
+const NAMES=['C₁: точки й площина','C₂: три точки','C₃: дві точки прямої','C₄: перетин площин','Наслідок 1: пряма й точка','Наслідок 2: паралельні прямі','Наслідок 3: прямі, що перетинаються'];
+const CAP=[[[.12,'Нехай задано площину α.'],[.3,'Візьмемо точку A, що належить площині α.'],[.45,'Позначимо її: A ∈ α.'],[.7,'Візьмемо точку M поза площиною α.'],[.82,'Позначимо її: M ∉ α.'],[9,'Аксіома C₁: у кожній площині є точки, і є точки поза нею.']],
+[[.08,'Нехай задано три точки A, B, C, що не лежать на одній прямій.'],[.38,'З’єднаємо їх відрізками AB, BC, CA.'],[.5,'Отримали трикутник ABC.'],[.75,'Розширимо його в усіх напрямках — отримаємо площину, що містить A, B, C.'],[.97,'Ця площина визначається точками A, B, C однозначно.'],[9,'Через три точки, що не лежать на одній прямій, проходить єдина площина.']],
+[[.1,'Нехай задано площину α і пряму, що перетинає її.'],[.25,'Пряма має з α одну спільну точку A; точка B лежить поза α.'],[.6,'Змінюємо нахил прямої: точка B наближається до α.'],[.78,'Коли B ∈ α, пряма має з α дві спільні точки.'],[9,'Дві точки прямої належать α ⇒ уся пряма належить α: AB ⊂ α. Приклад: натягнутий шнур на стіні.']],
+[[.12,'Нехай задано площину α.'],[.45,'Площина β наближається до α; перша спільна точка — A.'],[.6,'Далі спільні точки утворюють відрізок, що росте.'],[.74,'Усі спільні точки лежать на одній прямій a.'],[.95,'Наочно: стіни кімнати перетинаються по прямій.'],[9,'Дві різні площини зі спільною точкою перетинаються по прямій a, що проходить через цю точку.']],
+[[.04,'Нехай задано пряму l.'],[.24,'Позначимо на l точки B і C та візьмемо точку A, що не належить l.'],[.46,'З’єднаємо A з B і C.'],[.56,'Отримали трикутник ABC.'],[.82,'Площина трикутника ABC містить пряму l і точку A.'],[9,'Через пряму й точку поза нею проходить єдина площина.']],
+[[.25,'Нехай задано паралельні прямі a і b.'],[.35,'Позначимо точки P і Q на a та точку M на b.'],[.5,'З’єднаємо M з P і Q.'],[.85,'Площина трикутника MPQ містить a і, оскільки b ∥ a, усю пряму b.'],[9,'Через дві паралельні прямі проходить єдина площина.']],
+[[.3,'Нехай прямі m і n перетинаються в точці O.'],[.7,'Проведемо площину через m і n.'],[9,'Через дві прямі, що перетинаються, проходить єдина площина γ.']]];
+const cv=$('cv'),g=cv.getContext('2d');let cs=0,T=0,play=true,drag=null,baseYaw=-.5,pitch=.45,clock=0,last=performance.now(),CW,CH,S,cy,sy,cp,sp,capI='',ci=0,capAt=0,J=false,ov=null,FG,CARD,DUR=18,wr=0,ctr=[0,0,1];
+$('tabs').innerHTML=NAMES.map((n,i)=>`<button data-i="${i}" onclick="setScene(${i})">${n}</button>`).join('');
+const XS=['','Розтягніть трикутник у площину','Опустіть пряму до площини','Опустіть площину β','Розтягніть трикутник у площину','Розтягніть трикутник у площину','Накрийте прямі площиною'],HT=[0,.5,.7,.44,.56,.58,.35];
+const setInfo=()=>{$('info').innerHTML=J?INFO[cs]:INFO[cs].replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]\uFE0F?\s?/gu,'')};
+function setScene(i){cs=i;T=0;ov=null;capI='';play=true;$('pl').textContent='⏸ Пауза';$('ex').value=0;$('xs').style.display=XS[i]?'':'none';$('xt').textContent=XS[i];[...$('tabs').children].forEach(b=>b.classList.toggle('on',b.dataset.i==i));setInfo()}
+function setMode(j){J=!!j;document.body.classList.toggle('j',J);$('m0').classList.toggle('on',!J);$('m1').classList.toggle('on',J);setInfo()}
+const Q=[['Скільки площин проходить через три точки, що не лежать на одній прямій?',['Жодної','Одна','Безліч'],1,'Аксіома C₂: така площина існує й лише одна.'],
+['Скільки площин можна провести через три точки однієї прямої?',['Жодної','Одну','Безліч'],2,'Площин безліч: як сторінки розгорнутої книги навколо корінця.'],
+['Дві точки прямої лежать у площині α. Що можна сказати про цю пряму?',['Вона перетинає α в одній точці','Уся пряма лежить у α','Вона паралельна α'],1,'Аксіома C₃.'],
+['Дві різні площини мають спільну точку. Що ще в них є?',['Ще одна окрема точка','Спільна пряма, що проходить через цю точку','Нічого'],1,'Аксіома C₄.'],
+['Через пряму l і точку A поза нею можна провести…',['єдину площину','безліч площин','жодної площини'],0,'Наслідок 1.'],
+['Через які прямі не завжди можна провести площину?',['що перетинаються','паралельні','мимобіжні'],2,'Мимобіжні прямі не лежать в одній площині.']];
+$('qz').innerHTML=Q.map((x,i)=>`<div class="q"><b>${i+1}. ${x[0]}</b>${x[1].map((o,j)=>`<button onclick="ans(this,${i},${j})">${o}</button>`).join('')}<small></small></div>`).join('');
+function ans(b,i,j){const ok=j==Q[i][2];b.classList.add(ok?'ok':'no');b.parentNode.querySelector('small').textContent=(ok?'Так. ':'Ні. ')+Q[i][3]}
+function size(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;CW=r.width;CH=Math.round(CW*(CW<640?1:.62));cv.style.height=CH+'px';cv.width=CW*d;cv.height=CH*d;g.setTransform(d,0,0,d,0,0)}
+addEventListener('resize',size);
+cv.onpointerdown=e=>{drag=[e.clientX,e.clientY];cv.setPointerCapture(e.pointerId)};
+cv.onpointermove=e=>{if(!drag)return;baseYaw+=(e.clientX-drag[0])*.008;if(e.pointerType=='mouse')pitch=cl(pitch+(e.clientY-drag[1])*.006,.1,1.3);drag=[e.clientX,e.clientY]};
+cv.onpointerup=cv.onpointercancel=()=>{drag=null};
+$('pl').onclick=()=>{play=!play;if(play){ov=null;$('ex').value=0}$('pl').textContent=play?'⏸ Пауза':'▶ Пуск'};$('sc').oninput=e=>{T=+e.target.value;ov=null};
+$('ex').oninput=e=>{ov=+e.target.value;T=HT[cs];play=false;$('pl').textContent='▶ Пуск'};
+const ph=(a,b)=>ez(cl((T-a)/(b-a)));
+const toV=p=>{if(wr){const v=p[1]+4,c=Math.cos(wr),s=Math.sin(wr);p=[p[0],-4+v*c-p[2]*s,v*s+p[2]*c]}const x=p[0]-ctr[0],y=p[1]-ctr[1],z=p[2]-ctr[2],X=x*cy-y*sy,Y=x*sy+y*cy;return[X,z*cp+Y*sp,Y*cp-z*sp]},scr=v=>[CW/2+S*v[0],CH/2-S*v[1]];
+const mk=(pts,c,e)=>{const q=pts.map(toV);return{q,d:avg(q)[2],c,e}};
+function flush(it){it.sort((a,b)=>b.d-a.d);for(const f of it){g.beginPath();f.q.forEach((v,j)=>{const p=scr(v);j?g.lineTo(...p):g.moveTo(...p)});g.closePath();g.fillStyle=f.c;g.fill();g.strokeStyle=f.e?(J?'#2b7fd8':'rgba(37,99,235,.6)'):f.c;g.lineWidth=f.e?(J?2:1):.8;g.stroke()}}
+const BASE=()=>mk(PL(O3,[1,0,0],[0,1,0],5.5,4),'rgba(125,196,244,.42)',1),lab=(t,c)=>tx(t,toV([5.1,-3.5,0]),0,0,c||'#2563eb');
+function seg(a,b,col,wd,dash){const p=scr(toV(a)),q=scr(toV(b));if(J&&wd>=3&&!dash){g.beginPath();g.moveTo(...p);g.lineTo(...q);g.strokeStyle='rgba(15,23,42,.8)';g.lineWidth=wd+3;g.stroke()}g.beginPath();g.setLineDash(dash||[]);g.moveTo(...p);g.lineTo(...q);g.strokeStyle=col;g.lineWidth=J?wd:wd*.6+.6;g.stroke();g.setLineDash([])}
+function poly(pts,col,w,dash){g.beginPath();pts.forEach((p,i)=>{const q=scr(toV(p));i?g.lineTo(...q):g.moveTo(...q)});g.setLineDash(dash||[]);g.strokeStyle=col;g.lineWidth=w;g.stroke();g.setLineDash([])}
+function tx(t,v,dx,dy,col){const p=scr(v);g.font=(J?'italic bold 19px':'italic 18px')+' "Times New Roman",Georgia,serif';g.textAlign='center';g.lineWidth=4;g.strokeStyle=CARD;g.strokeText(t,p[0]+dx,p[1]+dy);g.fillStyle=col||FG;g.fillText(t,p[0]+dx,p[1]+dy)}
+function txs(t,x,y,col){g.font='bold 15px system-ui,sans-serif';g.textAlign='left';g.lineWidth=4;g.strokeStyle=CARD;g.strokeText(t,x,y);g.fillStyle=col||FG;g.fillText(t,x,y)}
+function dpt(p,col,r=6){const q=scr(toV(p));g.beginPath();g.arc(q[0],q[1],Math.max(r,.1),0,7);g.fillStyle=col;g.fill();g.strokeStyle=J?'#111':FG;g.lineWidth=J?2.5:1;g.stroke()}
+function stick(msg,hat,left){const jp=left&&T>.95?Math.abs(Math.sin(clock*8))*10:0,x=left?34:CW-30,y=CH-12-jp,w=Math.sin(clock*4)*.5+.5,talk=left&&clock-capAt<1.6&&Math.sin(clock*12)>0;g.save();g.strokeStyle='#111';g.lineWidth=3;g.lineCap='round';g.lineJoin='round';g.beginPath();
+g.moveTo(x,y-45);g.lineTo(x,y-22);g.moveTo(x,y-22);g.lineTo(x-9,y);g.moveTo(x,y-22);g.lineTo(x+9,y);g.moveTo(x,y-40);g.lineTo(x+13,y-28);g.moveTo(x,y-40);g.lineTo(x-13,y-40-14*w);g.stroke();
+g.beginPath();g.arc(x,y-54,10,0,7);g.fillStyle='#fff';g.fill();g.stroke();g.fillStyle='#111';for(const o of[-3.5,3.5]){g.beginPath();g.arc(x+o,y-55,1.8,0,7);g.fill()}
+if(talk){g.beginPath();g.ellipse(x,y-50,3,3.2,0,0,7);g.fill()}else{g.beginPath();g.arc(x,y-52,3.5,.2,PI-.2);g.lineWidth=1.6;g.stroke()}
+g.fillStyle='rgba(244,114,182,.55)';for(const o of[-6,6]){g.beginPath();g.arc(x+o,y-51,2,0,7);g.fill()}
+if(hat){g.fillStyle='#facc15';g.strokeStyle='#111';g.lineWidth=2;g.beginPath();g.arc(x,y-58,10.5,PI,0);g.fill();g.stroke();g.fillRect(x-13,y-58,26,3.5);g.strokeRect(x-13,y-58,26,3.5)}
+if(!msg){g.restore();return}
+g.font='13px system-ui,sans-serif';const mw=Math.min(180,CW*.5),ws=msg.split(' '),ls=[];let cur='';for(const s of ws){const t=cur?cur+' '+s:s;if(g.measureText(t).width>mw-14&&cur){ls.push(cur);cur=s}else cur=t}ls.push(cur);
+const bh=ls.length*16+10,bx=left?x+26:x-26-mw,by=y-54-bh/2;g.fillStyle='#fff';g.strokeStyle='#2b7fd8';g.lineWidth=2;g.beginPath();g.roundRect(bx,by,mw,bh,10);g.fill();g.stroke();
+g.fillStyle='#0f172a';g.textAlign='left';ls.forEach((l,i)=>g.fillText(l,bx+7,by+17+i*16));g.restore()}
+function fly(x,y,s,rot,al){const fl=Math.sin(clock*38)*.5+.5;g.save();g.globalAlpha=al;g.translate(x,y);g.rotate(rot);g.scale(s,s);g.strokeStyle='#111';g.lineWidth=1.2;
+for(const i of[-1,1])for(const j of[-3,1,5]){g.beginPath();g.moveTo(i*3,j);g.lineTo(i*10,j+(j-1)*.6+2);g.stroke()}
+g.fillStyle='rgba(170,200,255,.7)';g.strokeStyle='rgba(60,90,140,.9)';for(const sg of[-1,1]){g.save();g.translate(sg*3,-3);g.rotate(sg*(.6+.5*fl));g.beginPath();g.ellipse(0,-10,4.5,11,0,0,7);g.fill();g.stroke();g.restore()}
+g.fillStyle='#1f2937';g.beginPath();g.ellipse(0,4,5,9,0,0,7);g.fill();g.beginPath();g.ellipse(0,-4,5.5,5,0,0,7);g.fill();g.fillStyle='#374151';g.beginPath();g.arc(0,-11,4.2,0,7);g.fill();
+g.fillStyle='#dc2626';for(const o of[-3,3]){g.beginPath();g.arc(o,-12,2.4,0,7);g.fill()}g.restore()}
+function trike(x,y,dr,k){g.save();g.translate(x,y);g.scale(dr*k,k);g.strokeStyle=FG;g.lineWidth=3/k;g.lineCap='round';const wh=(cx,cy,r)=>{g.beginPath();g.arc(cx,cy,r,0,7);g.stroke()};
+wh(16,-11,11);wh(-15,-7,7);wh(-9,-7,7);const sp_=clock*8;g.beginPath();g.moveTo(16,-11);g.lineTo(16+9*Math.cos(sp_),-11+9*Math.sin(sp_));g.stroke();
+g.beginPath();g.moveTo(16,-11);g.lineTo(6,-30);g.moveTo(6,-30);g.lineTo(-12,-22);g.lineTo(-12,-7);g.moveTo(-12,-22);g.lineTo(-9,-7);g.moveTo(6,-30);g.lineTo(2,-34);g.lineTo(10,-34);g.stroke();
+g.beginPath();g.moveTo(-9,-27);g.lineTo(-3,-46);g.moveTo(-3,-46);g.lineTo(6,-36);g.moveTo(-9,-27);g.lineTo(6+4*Math.cos(sp_),-11+4*Math.sin(sp_));g.moveTo(-9,-27);g.lineTo(6-4*Math.cos(sp_),-11-4*Math.sin(sp_));g.stroke();
+g.beginPath();g.arc(-1,-53,7,0,7);g.fillStyle='#fff';g.fill();g.stroke();g.fillStyle='#e11d48';g.beginPath();g.arc(-1,-56,7.4,PI,0);g.fill();g.stroke();g.fillStyle='#111';g.beginPath();g.arc(2,-53,1.6,0,7);g.fill();g.restore()}
+const IN='#2563eb',OUT='#dc2626';
+function s0(){const A=[1.5,.8,0],M=[-1,-.6,3.2],kA=ph(.12,.3),mA=J?ph(.3,.45):ph(.12,.25),kM=ph(.5,.65),mM=J?ph(.7,.82):ph(.5,.62);flush([BASE()]);lab('α');
+const pa=scr(toV(A)),pm=scr(toV(M));
+if(J&&kA>0&&mA<1)fly(pa[0],pa[1]-6,S/40*(1-.6*mA),.5,kA*(1-mA));
+if(mA>0){dpt(A,IN,6*mA);if(mA>.9)tx('A ∈ α',toV(A),0,22,IN)}
+if(J&&kM>0&&mM<1)fly(pm[0]+Math.sin(clock*2.2)*8*(1-mM),pm[1]+Math.cos(clock*3)*5*(1-mM),S/40*(1-.6*mM),Math.sin(clock*1.5)*.7,kM*(1-mM));
+if(mM>0){seg(M,[M[0],M[1],0],OUT,1.5,[5,4]);dpt([M[0],M[1],0],'#94a3b8',3);dpt(M,OUT,6*mM);if(mM>.9)tx('M ∉ α',toV(M),0,-12,OUT)}
+}
+function triMorph(P,Q,R_,k){const e1=nrm(sub(Q,P)),pq=nm(sub(Q,P)),pr=sub(R_,P),pe=sub(pr,mul(e1,dot(pr,e1))),rv=nm(pe),e2=nrm(pe),uv=(u,v)=>add(P,add(mul(e1,u),mul(e2,v)));
+const big=[uv(-2.5,-2.3),uv(pq+2.5,-2.3),uv(pq+2.5,rv+2.3),uv(-2.5,rv+2.3)];return{pts:[P,Q,R_,R_].map((p,i)=>lerp(p,big[i],k)),uv,pq}}
+function s1(){const A=[-2.5,-1,.3],B=[2.5,-1.8,.6],C=[.5,2.2,2.2],tm=triMorph(A,B,C,ov!=null?ov:ph(.5,.75)),kf=ph(.38,.5);
+flush(kf>0?[mk(tm.pts,`rgba(125,196,244,${.45*kf})`,1)]:[]);
+seg(A,lerp(A,B,ph(.08,.18)),FG,3);seg(B,lerp(B,C,ph(.18,.28)),FG,3);seg(C,lerp(C,A,ph(.28,.38)),FG,3);
+for(const[p,n]of[[A,'A'],[B,'B'],[C,'C']]){dpt(p,IN,6);tx(n,toV(p),-12,-8)}
+if(J&&T>.78){const u=-1.5+8*ph(.78,.97),p0=scr(toV(tm.uv(u,1.8))),p1=scr(toV(tm.uv(u+.3,1.8)));trike(p0[0],p0[1],p1[0]>=p0[0]?1:-1,S/55)}}
+function s2(){const A=[-1.8,-.6,0],dd=nrm([3,1.6,0]),a=40*PI/180*(1-(ov!=null?ov:ph(.25,.6))),d=add(mul(dd,Math.cos(a)),mul(K,Math.sin(a))),B=add(A,mul(d,3.5)),rope=ph(.8,.9);
+flush([BASE()]);lab('α');seg(sub(A,mul(d,3)),add(A,mul(d,5.5)),J&&rope>.5?'#a16207':'#1d6fd8',J&&rope>.5?5:4);
+dpt(A,a>.02?OUT:IN,6);tx('A',toV(A),-12,18);dpt(B,B[2]<.03?IN:'#fff',6);tx('B',toV(B),12,-8);
+if(a>.03)txs('Спільна точка з α: лише A',12,26,OUT);else if(T<.7)txs('Спільні точки з α: A і B',12,26,IN);else txs('Уся пряма в площині: AB ⊂ α',12,26,'#1d6fd8');
+if(J&&T>.82)stick('Натягнутий шнур лежить у площині стіни.',1)}
+function s3(){const dd=[0,1,0],h=ph(.45,.6),sg=.5*(1-h),ta=.35*(1-h),e1=add(mul(dd,Math.cos(sg)),mul(K,Math.sin(sg))),e2=add(mul(K,Math.cos(ta)),mul([1,0,0],Math.sin(ta))),
+zc=5*(1-(ov!=null?ov:ph(.12,.45))),lo=2.4*(1-ph(.6,.72)),c=[.3,0,zc],q=[[-1,-lo],[1,-lo],[1,2.4],[-1,2.4]].map(([s,t])=>add(c,add(mul(e1,3.6*s),mul(e2,t))));
+flush([BASE(),mk(q,'rgba(179,157,219,.5)',1)]);lab('α');tx('β',toV(q[2]),12,-6,'#7c3aed');
+const sl=[];for(let i=0;i<4;i++){const p=q[i],r=q[(i+1)%4];if((p[2]<0)!=(r[2]<0))sl.push(lerp(p,r,p[2]/(p[2]-r[2])))}
+const mn=q.reduce((m,p)=>p[2]<m[2]?p:m,q[0]);let Ap=null;
+if(lo<.2)seg(q[0],q[1],OUT,4.5);else if(sl.length==2)seg(sl[0],sl[1],OUT,4.5);
+if(lo<.2)Ap=lerp(q[0],q[1],.5);else if(sl.length==2)Ap=lerp(sl[0],sl[1],.5);else if(mn[2]<.25&&T>.12)Ap=[mn[0],mn[1],0];
+if(Ap){dpt(Ap,OUT,6);tx('A',toV(Ap),-12,18);if(lo<.2)tx('a',toV(q[1]),12,-4,OUT)}
+}
+function s4(){const P1=[-3,-1,.5],d=nrm([1,.4,.1]),B=add(P1,mul(d,1.5)),C=add(P1,mul(d,5.5)),A=[.5,2,1.8],tm=triMorph(B,C,A,ov!=null?ov:ph(.56,.82)),kf=ph(.46,.56);
+flush(kf>0?[mk(tm.pts,`rgba(125,196,244,${.45*kf})`,1)]:[]);seg(sub(P1,mul(d,1.5)),add(P1,mul(d,9)),'#1d6fd8',4);tx('l',toV(add(P1,mul(d,9.2))),10,-6,'#1d6fd8');
+const kb=ph(.14,.24);if(kb>0){dpt(B,IN,6*kb);dpt(C,IN,6*kb);if(kb>.9){tx('B',toV(B),0,18);tx('C',toV(C),0,18)}}
+seg(A,lerp(A,B,ph(.26,.36)),FG,3);seg(A,lerp(A,C,ph(.36,.46)),FG,3);if(T>.24){dpt(A,OUT,6);tx('A',toV(A),0,-12,OUT)}}
+function s5(){const d=nrm([1,.4,.1]),P1=[-3,-1.5,.5],M=[-.3,1.9,2],Pa=add(P1,mul(d,1.5)),Qa=add(P1,mul(d,5.5)),tm=triMorph(Pa,Qa,M,ov!=null?ov:ph(.58,.85)),kf=ph(.5,.58),kl=ph(.05,.25),kp=ph(.25,.35),inpl=ph(.8,.9);
+flush(kf>0?[mk(tm.pts,`rgba(125,196,244,${.45*kf})`,1)]:[]);
+if(kl>0){seg(sub(P1,mul(d,1.5*kl)),add(P1,mul(d,7*kl)),IN,4);seg(sub(M,mul(d,3*kl)),add(M,mul(d,6*kl)),inpl>.5?'#1d6fd8':'#d97706',4)}
+if(kl>.9){tx('a',toV(add(P1,mul(d,7.2))),10,-6,IN);tx('b',toV(add(M,mul(d,6.2))),10,-6,'#d97706');txs('a ∥ b',12,26)}
+if(kp>0){for(const[p,n]of[[Pa,'P'],[Qa,'Q'],[M,'M']]){dpt(p,n=='M'?'#d97706':IN,6*kp);if(kp>.9)tx(n,toV(p),0,n=='M'?-12:18)}}
+seg(M,lerp(M,Pa,ph(.35,.43)),FG,3);seg(M,lerp(M,Qa,ph(.43,.5)),FG,3)}
+function s6(){const O=[0,.2,1],e1=nrm([1,.3,.25]),e2=nrm([-.35,1,-.3]),ka=ph(.05,.3),kp=ov!=null?ov:ph(.4,.7);
+flush(kp>0?[mk(PL(O,e1,e2,4.4,3.6),`rgba(125,196,244,${.45*kp})`,1)]:[]);
+if(ka>0){seg(sub(O,mul(e1,3.8*ka)),add(O,mul(e1,3.8*ka)),IN,4);seg(sub(O,mul(e2,3.8*ka)),add(O,mul(e2,3.8*ka)),'#d97706',4)}
+if(ka>.9){tx('m',toV(add(O,mul(e1,4.1))),8,-4,IN);tx('n',toV(add(O,mul(e2,4.1))),8,-4,'#d97706');dpt(O,OUT,6);tx('O',toV(O),-12,18,OUT)}
+if(kp>.6)tx('γ',toV(add(O,add(mul(e1,-3.6),mul(e2,-2.8)))),0,0,'#1d6fd8')}
+const BUB=[['Привіт! Це площина — як стіл.','Ой, муха! Сіла на площину.','Бззз… Муха стала точкою A!','А ця муха літає над столом…','Це точка M — вона не на площині!','Бачите? Є точки на площині й поза нею!'],
+['Три точки… не на одній прямій.','Зʼєднаємо їх мотузочками!','Вийшов трикутник!','Тягнемо-тягнемо… площина!','Покатаймося! Тр-р-р!','Через три точки — лише одна площина!'],
+['Ось площина й пряма.','Пряма торкається в точці A.','Опускаємо… ще трошки…','Тепер пряма лежить у площині!','Як шнур на стіні!'],
+['Є площина α.','Площина β спускається й торкається кутом!','Спільні точки розповзаються в пряму!','Лишаємо тільки лінію перетину.','Дивіться: це ж кут кімнати!','Дві площини зі спільною точкою мають спільну пряму!'],
+['Є пряма l.','Дві точки на прямій і ще одна — окремо.','Зʼєднуємо її з обома!','Трикутник!','Тягнемо його в площину…','Через пряму й точку — одна площина!'],
+['Дві паралельні прямі.','Ставимо точки.','Зʼєднуємо — трикутник!','Тягнемо в площину…','Через паралельні прямі — одна площина!'],
+['Дві прямі перетинаються в точці O.','Накриваємо їх площиною!','Через прямі, що перетинаються, — одна площина!']];
+const SFX=[['Ж-ж-ж!',.52,.68],['ТРІНЬ!',.62,.76],['КЛАЦ!',.55,.65],['БАХ!',.2,.3],['ТРІНЬ!',.7,.84],['ТРІНЬ!',.74,.88],['ТРІНЬ!',.55,.68]];
+function sfx(t,a,b,x,y){if(T<a||T>b)return;const sc=1+.12*Math.sin(clock*14),n=12;g.save();g.translate(x,y);g.scale(sc,sc);g.beginPath();for(let i=0;i<n*2;i++){const r=i%2?26:42,an=i*PI/n;g.lineTo(r*1.5*Math.cos(an),r*Math.sin(an))}g.closePath();g.fillStyle='#fde047';g.strokeStyle='#e11d48';g.lineWidth=3;g.fill();g.stroke();g.fillStyle='#e11d48';g.font='bold 17px system-ui,sans-serif';g.textAlign='center';g.fillText(t,0,6);g.restore()}
+function card(){const k=T<.06?1:T<.11?1-(T-.06)/.05:0;if(k<=0)return;const w=Math.min(CW*.82,430),x=(CW-w)/2,y=14-(1-k)*30;g.save();g.globalAlpha=k;g.fillStyle='#fde047';g.strokeStyle='#111';g.lineWidth=3;g.beginPath();g.roundRect(x,y,w,52,14);g.fill();g.stroke();g.fillStyle='#111';g.textAlign='center';g.font='bold 12px system-ui,sans-serif';g.fillText('СЕРІЯ '+(cs+1),CW/2,y+18);g.font='bold 18px system-ui,sans-serif';g.fillText(NAMES[cs],CW/2,y+40);g.restore()}
+function confetti(){const cols=['#ef4444','#3b82f6','#facc15','#22c55e','#a855f7','#fb923c'];for(let i=0;i<34;i++){const x=(i*97.3)%CW,y=((clock*90+i*61)%(CH+30))-15;g.save();g.translate(x,y);g.rotate(clock*3+i);g.fillStyle=cols[i%6];g.fillRect(-4,-2.5,8,5);g.restore()}}
+function extras(){if(!J)return;stick(cs==2&&T>.82?'':BUB[cs][ci],0,1);card();sfx(...SFX[cs],CW*.76,CH*.2);if(T>.95)confetti()}
+function caption(){const l=CAP[cs];ci=l.findIndex(x=>T<x[0]);if(ci<0)ci=l.length-1;const t=l[ci][1];if(t!=capI){capI=t;capAt=clock;$('cap').textContent=t}}
+function draw(){const st=getComputedStyle(document.documentElement);FG=st.getPropertyValue('--fg').trim();CARD=st.getPropertyValue('--card').trim();
+const yaw=baseYaw+($('au').checked&&!drag?.3*Math.sin(clock*.5):0);cy=Math.cos(yaw);sy=Math.sin(yaw);cp=Math.cos(pitch);sp=Math.sin(pitch);
+wr=0;ctr=[0,0,1];if(cs==2){const k=ph(.78,.97);wr=k*PI/2;ctr=[0,0,1+3*k]}if(cs==3){const k=ph(.74,.95);wr=k*PI/2;ctr=[0,0,1+3*k]}
+S=Math.min(CW/13,CH/9.5);g.clearRect(0,0,CW,CH);g.lineCap='round';[s0,s1,s2,s3,s4,s5,s6][cs]();caption();extras()}
+function frame(n){const d=Math.min(.05,(n-last)/1000);last=n;clock+=d;if(play){T+=d/DUR;if(T>1.12){if($('all').checked)setScene((cs+1)%7);else T=0}}$('sc').value=Math.min(T,1);draw();requestAnimationFrame(frame)}
+size();setMode(0);setScene(0);requestAnimationFrame(frame);
+</script></body></html>
