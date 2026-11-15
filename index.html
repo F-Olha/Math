@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Математика • Інтерактивні матеріали</title>
+  <link rel="preconnect" href="https://googleapis.com">
+  <link rel="preconnect" href="https://gstatic.com" crossorigin>
+  <link href="https://googleapis.com/css2?family=IBM+Plex+Mono:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #f5f6f8;
+      --card-bg: #ffffff;
+      --accent-blue: #6a89b7;
+      --note-blue: #dce8f8;
+      --note-yellow: #fdf2b3;
+      --text-main: #18181b;
+      --text-muted: #52525b;
+      --border-color: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .top-badge {
+      position: absolute;
+      top: 0;
+      left: 32px;
+      width: 64px;
+      height: 76px;
+      background-color: var(--accent-blue);
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(106, 137, 183, 0.25);
+    }
+
+    .top-badge svg {
+      width: 36px;
+      height: 36px;
+      stroke: #18181b;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .container {
+      max-width: 820px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 90px 20px 40px;
+      flex: 1;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 2rem;
+      line-height: 1.3;
+      margin: 0 0 12px 0;
+    }
+
+    header p {
+      font-family: 'IBM Plex Mono', monospace;
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .section {
+      background: var(--card-bg);
+      border: 2px solid var(--text-main);
+      border-radius: 14px;
+      padding: 24px 28px;
+      margin-bottom: 28px;
+      box-shadow: 4px 4px 0px var(--accent-blue);
+    }
+
+    .section h2 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin: 0 0 18px 0;
+      padding-bottom: 10px;
+      border-bottom: 2px dashed var(--border-color);
+    }
+
+    .links-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 14px;
+    }
+
+    .link-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      background-color: var(--bg-color);
+      border: 1.5px solid var(--text-main);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    .link-item:hover {
+      background-color: var(--note-blue);
+      transform: translate(-2px, -2px);
+      box-shadow: 3px 3px 0px var(--text-main);
+    }
+
+    .links-list li:nth-child(even) .link-item:hover {
+      background-color: var(--note-yellow);
+    }
+
+    .arrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .coming-soon {
+      color: var(--text-muted);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.9rem;
+      margin: 0;
+      padding: 8px 0;
+    }
+
+    footer {
+      background-color: var(--accent-blue);
+      color: #ffffff;
+      text-align: center;
+      padding: 16px 20px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.9rem;
+      margin-top: auto;
+    }
+
+    @media (max-width: 600px) {
+      .top-badge { left: 20px; width: 52px; height: 62px; }
+      h1 { font-size: 1.5rem; }
+      .section { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-badge" title="Ідеї та візуалізації">
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 18h6" />
+      <path d="M10 22h4" />
+      <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14" />
+      <line x1="12" y1="1" x2="12" y2="2" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+      <line x1="19.78" y1="4.22" x2="18.36" y2="5.64" />
+    </svg>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>Інтерактивна математика</h1>
+      <p>3D-моделі та візуалізації до уроків</p>
+    </header>
+
+    <!-- РОЗДІЛ 1: Геометрія -->
+    <div class="section">
+      <h2>Геометрія</h2>
+      <ul class="links-list">
+        <li>
+          <a href="geometry/cylinder-3d.html" class="link-item">
+            <span>Циліндр (3D-модель та перерізи)</span>
+            <span class="arrow">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="geometry/cone-3d.html" class="link-item">
+            <span>Конус (3D-модель та елементи)</span>
+            <span class="arrow">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="geometry/perpendicular-slant-projection.html" class="link-item">
+            <span>Перпендикуляр, похила та її проєкція</span>
+            <span class="arrow">→</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- РОЗДІЛ 2: Алгебра -->
+    <div class="section">
+      <h2>Алгебра</h2>
+      <p class="coming-soon">Матеріали готуються до публікації...</p>
+      <!-- Коли додасте перший файл в папку algebra/, розкоментуйте список нижче:
+      <ul class="links-list">
+        <li>
+          <a href="algebra/назва-файлу.html" class="link-item">
+            <span>Назва теми</span>
+            <span class="arrow">→</span>
+          </a>
+        </li>
+      </ul>
+      -->
+    </div>
+
+    <!-- РОЗДІЛ 3: Вища математика -->
+    <div class="section">
+      <h2>Вища математика</h2>
+      <ul class="links-list">
+        <li>
+          <a href="higher-math/fsm.html" class="link-item">
+            <span>Скінченні автомати (FSM)</span>
+            <span class="arrow">→</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    Навчальні матеріали • F-Olha
+  </footer>
+
+</body>
+</html>
