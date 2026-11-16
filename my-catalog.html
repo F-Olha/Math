@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Математика • Інтерактивні матеріали</title>
+  <link rel="preconnect" href="https://googleapis.com">
+  <link rel="preconnect" href="https://gstatic.com" crossorigin>
+  <link href="https://googleapis.com/css2?family=IBM+Plex+Mono:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #f5f6f8;
+      --card-bg: #ffffff;
+      --accent-blue: #6586b4;
+      --note-blue: #dce8f8;
+      --note-yellow: #fdf2b3;
+      --text-main: #0f172a;
+      --text-muted: #52525b;
+      --border-color: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Верхня плашка точно як на вашому зразку */
+    .top-badge {
+      position: absolute;
+      top: 0;
+      left: 32px;
+      width: 72px;
+      height: 82px;
+      background-color: var(--accent-blue);
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(101, 134, 180, 0.25);
+    }
+
+    .top-badge svg {
+      width: 52px;
+      height: 52px;
+    }
+
+    .container {
+      max-width: 820px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 96px 20px 40px;
+      flex: 1;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 2rem;
+      line-height: 1.3;
+      margin: 0 0 12px 0;
+    }
+
+    header p {
+      font-family: 'IBM Plex Mono', monospace;
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .section {
+      background: var(--card-bg);
+      border: 2px solid var(--text-main);
+      border-radius: 14px;
+      padding: 24px 28px;
+      margin-bottom: 28px;
+      box-shadow: 4px 4px 0px var(--accent-blue);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 0 18px 0;
+      padding-bottom: 12px;
+      border-bottom: 2px dashed var(--border-color);
+    }
+
+    .section-icon {
+      width: 34px;
+      height: 34px;
+      background-color: var(--accent-blue);
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .section-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .section h2 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 1.35rem;
+      margin: 0;
+    }
+
+    .links-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 14px;
+    }
+
+    .link-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      background-color: var(--bg-color);
+      border: 1.5px solid var(--text-main);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 500;
+      transition: all 0.15s ease;
+    }
+
+    .link-item:hover {
+      background-color: var(--note-blue);
+      transform: translate(-2px, -2px);
+      box-shadow: 3px 3px 0px var(--text-main);
+    }
+
+    .links-list li:nth-child(even) .link-item:hover {
+      background-color: var(--note-yellow);
+    }
+
+    .arrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .coming-soon {
+      color: var(--text-muted);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.9rem;
+      margin: 0;
+      padding: 8px 0;
+    }
+
+    footer {
+      background-color: var(--accent-blue);
+      color: #ffffff;
+      text-align: center;
+      padding: 16px 20px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.9rem;
+      margin-top: auto;
+    }
+
+    @media (max-width: 600px) {
+      .top-badge { left: 20px; width: 58px; height: 68px; }
+      .top-badge svg { width: 42px; height: 42px; }
+      h1 { font-size: 1.5rem; }
+      .section { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Схований шаблон вашої фірмової лампочки для багаторазового використання -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <g id="custom-bulb" stroke="#000000" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <!-- 7 променів навколо лампочки -->
+        <line x1="50" y1="8" x2="50" y2="17" />
+        <line x1="31" y1="13" x2="36" y2="21" />
+        <line x1="17" y1="27" x2="25" y2="32" />
+        <line x1="11" y1="45" x2="20" y2="45" />
+        <line x1="69" y1="13" x2="64" y2="21" />
+        <line x1="83" y1="27" x2="75" y2="32" />
+        <line x1="89" y1="45" x2="80" y2="45" />
+        <!-- Контур скляної колби -->
+        <path d="M 38 69 C 38 60, 27 56, 27 43 A 23 23 0 1 1 73 43 C 73 56, 62 60, 62 69 Z" />
+        <!-- Внутрішній блік зліва -->
+        <path d="M 34 43 A 16 16 0 0 1 48 27" />
+        <!-- 3 смужки цоколя -->
+        <line x1="39" y1="75" x2="61" y2="75" />
+        <line x1="41" y1="81" x2="59" y2="81" />
+        <line x1="43" y1="87" x2="57" y2="87" />
+        <!-- Нижній заокруглений контакт -->
+        <path d="M 46 87 A 4 4 0 0 0 54 87" />
+      </g>
+    </defs>
+  </svg>
+
+  <!-- Верхня плашка з лампочкою -->
+  <div class="top-badge" title="Ідеї та візуалізації">
+    <svg viewBox="0 0 100 100">
+      <use href="#custom-bulb" />
+    </svg>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>Інтерактивна математика</h1>
+      <p>3D-моделі та візуалізації до уроків</p>
+    </header>
+
+    <!-- РОЗДІЛ 1: Алгебра -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">
+          <svg viewBox="0 0 100 100"><use href="#custom-bulb" /></svg>
+        </span>
+        <h2>Алгебра</h2>
+      </div>
+           <ul class="links-list">
+        <li>
+          <a href="algebra/fsm.html" class="link-item">
+            <span><strong>Тренажер</strong> Формули скороченого множення (ФСМ)</span>
+            <span class="arrow">→</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- РОЗДІЛ 2: Геометрія -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">
+          <svg viewBox="0 0 100 100"><use href="#custom-bulb" /></svg>
+        </span>
+        <h2>Геометрія</h2>
+      </div>
+      <ul class="links-list">
+        <ul class="links-list">
+        <ul class="links-list">
+       <li>
+        <a href="geometry/angle-constructor.html" class="link-item">
+            <span><strong>Тренажер</strong> Конструктор кутів <span style="font-size: 0.8em; opacity: 0.7; font-weight: normal;">(від Curly Girl)</span></span>
+            <span class="arrow">→</span>
+        </a>
+    </li>
+    <li>
+        <a href="geometry/magic-triangles.html" class="link-item">
+            <span><strong>Тренажер</strong> Магічні трикутники</span>
+            <span class="arrow">→</span>
+        </a>
+    </li>
+    <li>
+        <a href="geometry/stereometry-axioms.html" class="link-item">
+            <span>Аксіоми стереометрії</span>
+            <span class="arrow">→</span>
+        </a>
+    </li>
+        <li>
+          <a href="geometry/stereometry-axioms.html" class="link-item">
+            <span>Аксіоми стереометрії</span>
+            <span class="arrow">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="geometry/lines-in-space.html" class="link-item">
+            <span>Взаємне розміщення прямих у просторі</span>
+            <span class="arrow">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="geometry/parallelism-perpendicularity.html" class="link-item">
+            <span>Паралельність і перпендикулярність у просторі</span>
+            <span class="arrow">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="geometry/perpendicular-slant-projection.html" class="link-item">
+            <span>Перпендикуляр, похила та її проєкція</span>
+            <span class="arrow">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="geometry/cylinder-3d.html" class="link-item">
+            <span>Циліндр (3D-модель та перерізи)</span>
+            <span class="arrow">→</span>
+          </a>
+        </li>
+        <li>
+          <a href="geometry/cone-3d.html" class="link-item">
+            <span>Конус (3D-модель та елементи)</span>
+            <span class="arrow">→</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- РОЗДІЛ 3: Вища математика -->
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">
+          <svg viewBox="0 0 100 100"><use href="#custom-bulb" /></svg>
+        </span>
+        <h2>Вища математика</h2>
+      </div>
+                 <ul class="links-list">
+        <li>
+          <a href="higher-math/lines-in-space-analytic.html" class="link-item">
+            <span>Прямі у просторі (аналітична геометрія)</span>
+            <span class="arrow">→</span>
+          </a>
+        </li>
+      </ul>
+
+    </div>
+  </div>
+
+  <footer>
+    Навчальні матеріали • F-Olha
+  </footer>
+
+</body>
+</html>
