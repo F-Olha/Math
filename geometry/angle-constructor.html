@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Конструктор кутів</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;0,7..72,700;1,7..72,400;1,7..72,600&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5efe4;--card:#fffaf3;--ink:#2a2622;--muted:#7d7266;--line:#e6dccb;--ter:#c0673f;--teal:#2e7d78;--gold:#c49a3a;--peach:#f8e7d7;--blue:#e3eceb;--sand:#f2e8d3}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Literata,Georgia,serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:22px 16px 48px}
+.eyebrow{font-family:Inter,system-ui,sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ter);font-weight:600}
+.eyebrow.dark{color:var(--muted)}
+h1{font-size:clamp(30px,5vw,46px);margin:6px 0 8px;line-height:1.08;font-weight:700}
+.sub{color:var(--muted);font-size:17px;margin:0 0 14px;font-style:italic}
+.rule{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--ter),var(--gold) 50%,var(--teal));margin-bottom:18px}
+.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);gap:18px;align-items:start}
+@media(max-width:920px){.grid{grid-template-columns:1fr}}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.card{background:var(--card);border-radius:20px;padding:16px 18px}
+.card.peach{background:var(--peach)}.card.sand{background:var(--sand)}.card.blue{background:var(--blue)}
+.stage{position:relative;background:#fff;border:1.5px solid var(--line);border-radius:16px;overflow:hidden;--s:1}
+.stage svg{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none}
+.lab{position:absolute;transform:translate(-50%,-50%);width:calc(54px*var(--s));height:calc(50px*var(--s));min-width:30px;min-height:28px;
+  border:1.5px dashed transparent;border-radius:8px;background:transparent;text-align:center;font-family:Literata,serif;font-style:italic;
+  font-size:max(17px,calc(34px*var(--s)));color:var(--ink);padding:0;outline:none;transition:.15s}
+.lab:hover,.lab:focus{border-color:#cbbda6;background:rgba(255,250,243,.9)}
+.lab:placeholder-shown{border-color:#ddd2bf}
+.lab::placeholder{color:#cbbfae}
+.alab{--n:1;position:absolute;transform:translate(-50%,-50%);width:calc(max(26px,calc(40px*var(--s))) + (var(--n) - 1)*0.62em);height:max(26px,calc(40px*var(--s)));
+  border:1.5px dashed transparent;border-radius:6px;background:transparent;text-align:center;font-family:Literata,serif;font-style:italic;
+  font-size:max(16px,calc(32px*var(--s)));color:#1f1c19;padding:0;outline:none;z-index:3;transition:border-color .15s,background .15s}
+.alab:placeholder-shown{border-color:var(--c,#bba98d);background:rgba(255,255,255,.85)}
+.alab:hover,.alab:focus{border-color:var(--c,#bba98d);border-style:solid;background:rgba(255,255,255,.92)}
+.alab[hidden]{display:none}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font-family:Inter,sans-serif;font-size:13.5px;font-weight:600;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.hint{color:var(--muted);font-style:italic;font-size:14.5px;margin:10px 2px 0;line-height:1.5}
+.btn{border:none;border-radius:14px;padding:11px 18px;font-family:inherit;font-size:16px;cursor:pointer;background:var(--ink);color:#fff}
+.btn.light{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{padding:8px 12px;font-size:14.5px;border-radius:12px}
+.btn.danger{background:#fff;color:#b44;border:1.5px solid #e8c9c4}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.new{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.num{width:84px;font-family:Inter,sans-serif;font-weight:700;font-size:20px;padding:8px 10px;border:1.5px solid var(--line);border-radius:12px;text-align:center;color:var(--ink);background:#fff}
+.deg{font-size:20px;font-weight:600}
+.quick{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.quick button{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:6px 10px;font-family:Inter,sans-serif;font-weight:600;font-size:13.5px;cursor:pointer;color:var(--ink)}
+.list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.item{display:inline-flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:6px 10px;cursor:pointer;font-size:16px}
+.item.on{border-color:var(--ink);box-shadow:0 0 0 2px rgba(42,38,34,.12)}
+.item .sw{width:16px;height:16px;border-radius:5px}
+.item .eye{border:none;background:none;cursor:pointer;font-size:15px;padding:0 0 0 4px;color:var(--muted)}
+.item.hid{opacity:.5}
+.empty{color:var(--muted);font-style:italic;font-size:15px}
+.ctl{display:grid;grid-template-columns:96px 1fr 66px;gap:10px;align-items:center;margin:10px 0}
+.ctl label{font-size:15px}
+.ctl .num{width:66px;font-size:16px;padding:6px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--ter),var(--gold));outline:none;margin:0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid var(--ink);cursor:grab}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--ink)}
+.sws{display:flex;gap:8px;flex-wrap:wrap}
+.sws button{width:30px;height:30px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px var(--line);cursor:pointer}
+.sws button.on{box-shadow:0 0 0 2.5px var(--ink)}
+.labs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.labs label{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:4px;font-family:Inter,sans-serif}
+.labs input,.tx{font-family:Literata,serif;font-style:italic;font-size:20px;padding:6px 8px;border:1.5px solid var(--line);border-radius:10px;text-align:center;width:100%;color:var(--ink);background:#fff}
+.tx{font-style:normal;font-size:17px;text-align:left}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
+.seg button{border:none;background:#fff;padding:8px 12px;font-family:inherit;font-size:14.5px;cursor:pointer;color:var(--ink)}
+.seg button.on{background:var(--ink);color:#fff}
+h4{margin:14px 0 4px;font-size:15px;font-weight:600}
+.sep{height:1px;background:rgba(42,38,34,.1);margin:14px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Інтерактив · Геометрія</div>
+  <h1>Конструктор кутів</h1>
+  <p class="sub">Створи кут потрібної величини, перетягни його на осі або на інший кут — і побачиш, з яких частин складається кут.</p>
+  <div class="rule"></div>
+
+  <div class="grid">
+    <div class="col">
+      <div class="card">
+        <div class="toolbar">
+          <button class="chip" id="tAxes" aria-pressed="true">Перпендикулярні осі</button>
+          <button class="chip" id="tRight" aria-pressed="false">Позначка прямого кута</button>
+          <button class="chip" id="tSnap" aria-pressed="true">Прилипання</button>
+        </div>
+        <div class="stage" id="stage">
+          <svg id="svg" viewBox="0 0 1000 720" aria-label="Полотно з кутами"></svg>
+        </div>
+        <p class="hint">Тягни кут за кольорову серединку або промінь, щоб пересунути. ⟲ на кінці першого променя — повернути кут, ⇔ на кінці другого — змінити величину. Вершина прилипає до точки перетину осей і до вершин інших кутів, промені — до осей і до променів інших кутів. У віконця біля осей можна вписати свої букви.</p>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card peach">
+        <div class="eyebrow">Новий кут</div>
+        <div class="new">
+          <input class="num" id="newVal" type="number" min="1" max="359" value="56"><span class="deg">°</span>
+          <button class="btn" id="create">Створити кут</button>
+        </div>
+        <div class="quick" id="quick"></div>
+      </div>
+
+      <div class="card sand">
+        <div class="eyebrow">Кути на полотні</div>
+        <div class="list" id="list"></div>
+        <div id="editor"></div>
+      </div>
+
+      <div class="card blue">
+        <div class="eyebrow" style="color:var(--teal)">Осі та полотно</div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn light sm" id="lblStd">Підписати A, B, C, D, O</button>
+          <button class="btn light sm" id="lblClear">Стерти букви осей</button>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn light sm" id="example">Приклад: ∠AOD і ∠EOD</button>
+          <button class="btn danger sm" id="clear">Очистити полотно</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(()=>{
+const $=s=>document.querySelector(s);
+const W=1000,H=720,O={x:500,y:360};
+const COLORS=['#4f9a5a','#d9774a','#3d8fa6','#d1a02e','#8a6bb8','#c95d7a'];
+const AX={top:{x:O.x-34,y:44,d:'A'},bottom:{x:O.x-34,y:676,d:'B'},left:{x:62,y:O.y+34,d:'C'},right:{x:938,y:O.y+34,d:'D'},center:{x:O.x-30,y:O.y-30,d:'O'}};
+const st={angles:[],sel:null,axes:true,right:false,snap:true,next:1,lab:{top:'A',bottom:'B',left:'C',right:'D',center:'O'}};
+let drag=null,snapMark=null;
+
+const svg=$('#svg'),stage=$('#stage');
+const rad=d=>d*Math.PI/180,deg=r=>r*180/Math.PI;
+const norm=d=>((d%360)+360)%360;
+const diff=(a,b)=>((a-b)%360+540)%360-180;
+const P=(a,d,L)=>({x:a.x+L*Math.cos(rad(d)),y:a.y-L*Math.sin(rad(d))});
+const d2=a=>norm(a.rot+a.dir*a.val);
+const byId=id=>st.angles.find(a=>a.id===id);
+const sel=()=>byId(st.sel);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function shade(hex,k){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;r=Math.round(r*(1+k));g=Math.round(g*(1+k));b=Math.round(b*(1+k));return `rgb(${r},${g},${b})`}
+const same=(p,q)=>Math.hypot(p.x-q.x,p.y-q.y)<0.5;
+
+/* ---------- axis label windows ---------- */
+Object.entries(AX).forEach(([k,v])=>{
+  const i=document.createElement('input');i.className='lab';i.maxLength=3;i.value=st.lab[k];i.placeholder='…';i.dataset.k=k;
+  i.style.left=(v.x/W*100)+'%';i.style.top=(v.y/H*100)+'%';
+  i.oninput=()=>{st.lab[k]=i.value;renderList()};
+  stage.appendChild(i);
+});
+const setScale=()=>stage.style.setProperty('--s',stage.clientWidth/W);
+new ResizeObserver(setScale).observe(stage);setScale();
+function syncAxisInputs(){stage.querySelectorAll('.lab').forEach(i=>{i.value=st.lab[i.dataset.k];i.hidden=!st.axes})}
+
+/* ---------- angles ---------- */
+function addAngle(val,o={}){
+  const n=st.angles.length;
+  const a=Object.assign({id:st.next++,x:150+(n%3)*70,y:610-(n%3)*30,rot:0,val,dir:1,color:COLORS[n%COLORS.length],r:72+(n%4)*24,len:250,lv:'',l1:'',l2:'',txt:'',hidden:false},o);
+  st.angles.push(a);st.sel=a.id;return a;
+}
+function sector(a,r){
+  const p1=P(a,a.rot,r),p2=P(a,a.rot+a.dir*a.val,r);
+  return `M${a.x.toFixed(2)} ${a.y.toFixed(2)}L${p1.x.toFixed(2)} ${p1.y.toFixed(2)}A${r} ${r} 0 ${a.val>180?1:0} ${a.dir>0?0:1} ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}Z`;
+}
+function name(a){
+  const atO=st.axes&&same(a,O);
+  const v=a.lv||(atO?st.lab.center:'');
+  const ax=d=>{if(!atO)return '';const k={0:'right',90:'top',180:'left',270:'bottom'}[norm(Math.round(d))];return k?st.lab[k]:''};
+  const e1=a.l1||ax(a.rot),e2=a.l2||ax(d2(a));
+  if(e1&&v&&e2)return `∠${e1}${v}${e2} =`;
+  return '∠';
+}
+
+/* ---------- render ---------- */
+function render(){
+  let g=`<defs><filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity=".25"/></filter></defs>`;
+  if(st.axes){
+    g+=`<line x1="40" y1="${O.y}" x2="960" y2="${O.y}" stroke="#1f1c19" stroke-width="3.2"/>`;
+    g+=`<line x1="${O.x}" y1="24" x2="${O.x}" y2="696" stroke="#1f1c19" stroke-width="3.2"/>`;
+    if(st.right)g+=`<path d="M${O.x} ${O.y-26}h26v26" fill="none" stroke="#1f1c19" stroke-width="2.2"/>`;
+  }
+  const vis=st.angles.filter(a=>!a.hidden);
+  // fills (z-order), top one is last
+  vis.forEach(a=>{
+    const on=a.id===st.sel;
+    g+=`<path d="${sector(a,a.r)}" fill="${a.color}" fill-opacity="${on?.5:.55}" stroke="${shade(a.color,-.25)}" stroke-width="${on?2.6:1.8}" data-id="${a.id}" data-act="move" style="cursor:grab"/>`;
+  });
+  // rays + hit lines
+  vis.forEach(a=>{
+    const p1=P(a,a.rot,a.len),p2=P(a,a.rot+a.dir*a.val,a.len),c=shade(a.color,-.35),on=a.id===st.sel;
+    [p1,p2].forEach(p=>{
+      g+=`<line x1="${a.x}" y1="${a.y}" x2="${p.x}" y2="${p.y}" stroke="transparent" stroke-width="22" data-id="${a.id}" data-act="move" style="cursor:grab"/>`;
+      g+=`<line x1="${a.x}" y1="${a.y}" x2="${p.x}" y2="${p.y}" stroke="${c}" stroke-width="${on?4.4:3.4}" stroke-linecap="round" pointer-events="none"/>`;
+    });
+  });
+  // vertices, labels
+  vis.forEach(a=>{
+    const c=shade(a.color,-.35);
+    g+=`<circle cx="${a.x}" cy="${a.y}" r="6" fill="${c}" data-id="${a.id}" data-act="move" style="cursor:grab"/>`;
+    const m=a.rot+a.dir*a.val/2,arc=a.r*rad(a.val);
+    const lp=arc<80||a.r<55?P(a,m,a.r+30):P(a,m,a.r>80?a.r-30:a.r*0.6);
+    const t=a.txt||`${a.val}°`;
+    g+=`<text x="${lp.x}" y="${lp.y+8}" text-anchor="middle" font-family="Inter,sans-serif" font-weight="700" font-size="24" fill="${shade(a.color,-.45)}" paint-order="stroke" stroke="#fff" stroke-width="5" stroke-linejoin="round" pointer-events="none">${esc(t)}</text>`;
+    const lab=(txt,p)=>{if(txt)g+=`<text x="${p.x}" y="${p.y+11}" text-anchor="middle" font-family="Literata,serif" font-style="italic" font-size="34" fill="#1f1c19" paint-order="stroke" stroke="#fff" stroke-width="5" pointer-events="none">${esc(txt)}</text>`};
+
+  });
+  // handles
+  const s=sel();
+  if(s&&!s.hidden){
+    const h1=P(s,s.rot,s.len),h2=P(s,s.rot+s.dir*s.val,s.len),c=shade(s.color,-.35);
+    g+=`<g filter="url(#sh)"><circle cx="${h1.x}" cy="${h1.y}" r="17" fill="#fff" stroke="${c}" stroke-width="3" data-id="${s.id}" data-act="rot" style="cursor:alias"/>
+      <text x="${h1.x}" y="${h1.y+7}" text-anchor="middle" font-size="20" fill="${c}" pointer-events="none">⟲</text>
+      <circle cx="${h2.x}" cy="${h2.y}" r="17" fill="${c}" stroke="#fff" stroke-width="3" data-id="${s.id}" data-act="size" style="cursor:ew-resize"/>
+      <text x="${h2.x}" y="${h2.y+7}" text-anchor="middle" font-size="19" fill="#fff" pointer-events="none">⇔</text></g>`;
+  }
+  if(snapMark)g+=`<circle cx="${snapMark.x}" cy="${snapMark.y}" r="16" fill="none" stroke="#c0673f" stroke-width="2.5" stroke-dasharray="4 3"/>`;
+  svg.innerHTML=g;
+  placeBoxes();
+}
+
+/* ---------- letter boxes next to angles ---------- */
+const boxes=new Map();
+function mkBox(a,k){
+  const i=document.createElement('input');i.className='alab';i.maxLength=3;i.placeholder='';
+  i.title=k==='lv'?'буква вершини':'буква на кінці променя';
+  i.oninput=()=>{i.style.setProperty('--n',Math.max(1,i.value.length));const b=byId(a.id);if(!b)return;b[k]=i.value;const pf=$('#'+k);if(pf&&st.sel===b.id)pf.value=i.value;renderList()};
+  i.onfocus=()=>{if(st.sel!==a.id){st.sel=a.id;render();renderList();renderEditor()}};
+  stage.appendChild(i);return i;
+}
+function placeBoxes(){
+  const alive=new Set();
+  const vis=st.angles.filter(a=>!a.hidden);
+  vis.forEach((a,idx)=>{
+    let bx=boxes.get(a.id);if(!bx){bx={l1:mkBox(a,'l1'),l2:mkBox(a,'l2'),lv:mkBox(a,'lv')};boxes.set(a.id,bx)}
+    alive.add(a.id);
+    const on=a.id===st.sel,m=a.rot+a.dir*a.val/2,col=shade(a.color,-.25);
+    const atO=st.axes&&same(a,O);
+    const topAtVertex=!vis.slice(idx+1).some(b=>same(a,b));
+    const pos={l1:P(a,a.rot,a.len+44),l2:P(a,a.rot+a.dir*a.val,a.len+44),lv:P(a,m+180,36)};
+    ['l1','l2','lv'].forEach(k=>{
+      const i=bx[k];
+      let show=on||a[k];
+      if(k==='lv')show=show&&!atO&&topAtVertex;
+      i.hidden=!show;
+      i.style.left=(pos[k].x/W*100)+'%';i.style.top=(pos[k].y/H*100)+'%';
+      i.style.setProperty('--c',col);
+      if(document.activeElement!==i&&i.value!==a[k])i.value=a[k];
+      i.style.setProperty('--n',Math.max(1,i.value.length));
+    });
+  });
+  for(const [id,bx] of boxes){if(!alive.has(id)){Object.values(bx).forEach(i=>i.remove());boxes.delete(id)}}
+}
+
+/* ---------- pointer ---------- */
+function pt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse())}
+function vCands(a){const c=[];if(st.axes)c.push({x:O.x,y:O.y});st.angles.forEach(b=>{if(b!==a&&!b.hidden)c.push({x:b.x,y:b.y})});return c}
+function dCands(a){
+  const c=[];if(st.axes&&same(a,O))c.push(0,90,180,270);
+  st.angles.forEach(b=>{if(b!==a&&!b.hidden&&same(a,b))c.push(norm(b.rot),d2(b))});return c;
+}
+svg.addEventListener('pointerdown',e=>{
+  const t=e.target.closest('[data-id]');
+  if(!t){if(st.sel!==null){st.sel=null;render();renderList();renderEditor()}return}
+  const a=byId(+t.dataset.id);const p=pt(e);
+  if(st.sel!==a.id){st.sel=a.id;renderEditor()}
+  // bring to front
+  st.angles.splice(st.angles.indexOf(a),1);st.angles.push(a);
+  drag={a,act:t.dataset.act,ox:p.x-a.x,oy:p.y-a.y};
+  svg.setPointerCapture(e.pointerId);render();renderList();
+});
+svg.addEventListener('pointermove',e=>{
+  if(!drag)return;const a=drag.a,p=pt(e);
+  if(drag.act==='move'){
+    let x=p.x-drag.ox,y=p.y-drag.oy;snapMark=null;
+    if(st.snap)for(const c of vCands(a)){if(Math.hypot(c.x-x,c.y-y)<24){x=c.x;y=c.y;snapMark=c;break}}
+    a.x=Math.max(10,Math.min(W-10,x));a.y=Math.max(10,Math.min(H-10,y));
+  }else{
+    const th=deg(Math.atan2(-(p.y-a.y),p.x-a.x));const C=st.snap?dCands(a):[];
+    if(drag.act==='rot'){
+      let r=norm(Math.round(th));
+      for(const c of C){if(Math.abs(diff(r,c))<=4){r=c;break}if(Math.abs(diff(r+a.dir*a.val,c))<=4){r=norm(c-a.dir*a.val);break}}
+      a.rot=r;
+    }else{
+      let v=norm(Math.round(a.dir*(th-a.rot)));
+      for(const c of C){if(Math.abs(diff(a.rot+a.dir*v,c))<=4){v=norm(Math.round(a.dir*(c-a.rot)));break}}
+      a.val=Math.max(1,Math.min(359,v||359));
+    }
+  }
+  render();syncEditor();
+});
+const up=()=>{if(drag){drag=null;snapMark=null;render();renderList();syncEditor()}};
+svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',up);
+
+/* ---------- panel ---------- */
+const QUICK=[30,45,56,60,90,120,135,180];
+$('#quick').innerHTML=QUICK.map(v=>`<button data-v="${v}">${v}°</button>`).join('');
+$('#quick').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('#newVal').value=b.dataset.v;create()});
+function create(){let v=Math.round(+$('#newVal').value);if(!(v>=1&&v<=359)){$('#newVal').value=56;v=56}addAngle(v);render();renderList();renderEditor()}
+$('#create').onclick=create;
+$('#newVal').addEventListener('keydown',e=>{if(e.key==='Enter')create()});
+
+function renderList(){
+  const L=$('#list');
+  if(!st.angles.length){L.innerHTML='<span class="empty">Поки що кутів немає — створи перший.</span>';return}
+  L.innerHTML=st.angles.map(a=>`<span class="item${a.id===st.sel?' on':''}${a.hidden?' hid':''}" data-id="${a.id}"><span class="sw" style="background:${a.color}"></span><span>${esc(name(a))} ${a.val}°</span><button class="eye" data-eye="${a.id}" title="${a.hidden?'показати':'сховати'}">${a.hidden?'◌':'◉'}</button></span>`).join('');
+  L.querySelectorAll('.item').forEach(it=>it.onclick=e=>{
+    const id=+it.dataset.id,a=byId(id);
+    if(e.target.dataset.eye){a.hidden=!a.hidden}else st.sel=id;
+    render();renderList();renderEditor();
+  });
+}
+function renderEditor(){
+  const a=sel(),E=$('#editor');
+  if(!a){E.innerHTML='';return}
+  E.innerHTML=`<div class="sep"></div>
+   <div class="ctl"><label>Величина</label><input type="range" id="eVal" min="1" max="359" step="1"><input class="num" id="nVal" type="number" min="1" max="359"></div>
+   <div class="ctl"><label>Поворот</label><input type="range" id="eRot" min="0" max="359" step="1"><input class="num" id="nRot" type="number" min="0" max="359"></div>
+   <div class="row" style="margin:6px 0 4px"><span style="font-size:15px;width:96px">Напрям</span>
+     <div class="seg"><button id="dCCW">↺ проти год. стрілки</button><button id="dCW">↻ за год. стрілкою</button></div></div>
+   <div class="ctl"><label>Серединка</label><input type="range" id="eR" min="30" max="240" step="2"><span></span></div>
+   <div class="ctl"><label>Промені</label><input type="range" id="eLen" min="110" max="420" step="5"><span></span></div>
+   <h4>Колір</h4><div class="sws" id="sws">${COLORS.map(c=>`<button style="background:${c}" data-c="${c}" class="${c===a.color?'on':''}"></button>`).join('')}</div>
+   <h4>Букви</h4>
+   <div class="labs">
+     <label>кінець 1-го променя<input id="l1" maxlength="3" placeholder="—"></label>
+     <label>вершина<input id="lv" maxlength="3" placeholder="—"></label>
+     <label>кінець 2-го променя<input id="l2" maxlength="3" placeholder="—"></label>
+   </div>
+   <h4>Напис у куті</h4>
+   <input class="tx" id="txt" maxlength="12" placeholder="порожньо — показати градуси (наприклад, ? або x)">
+   <div class="row" style="margin-top:14px">
+     <button class="btn light sm" id="toO">Вершину — в точку перетину осей</button>
+     <button class="btn light sm" id="front">Нагору</button>
+     <button class="btn light sm" id="back">Вниз</button>
+     <button class="btn light sm" id="dup">Копія</button>
+     <button class="btn danger sm" id="del">Видалити</button>
+   </div>`;
+  const bindPair=(r,n,key,lo,hi)=>{const f=v=>{v=Math.round(+v);if(isNaN(v))return;a[key]=Math.max(lo,Math.min(hi,v));render();renderList();syncEditor()};$(r).oninput=e=>f(e.target.value);$(n).onchange=e=>f(e.target.value)};
+  bindPair('#eVal','#nVal','val',1,359);bindPair('#eRot','#nRot','rot',0,359);
+  $('#eR').oninput=e=>{a.r=+e.target.value;render()};
+  $('#eLen').oninput=e=>{a.len=+e.target.value;render()};
+  $('#dCCW').onclick=()=>{a.dir=1;render();syncEditor()};
+  $('#dCW').onclick=()=>{a.dir=-1;render();syncEditor()};
+  $('#sws').querySelectorAll('button').forEach(b=>b.onclick=()=>{a.color=b.dataset.c;$('#sws').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));render();renderList()});
+  ['l1','lv','l2','txt'].forEach(k=>{const i=$('#'+k);i.value=a[k];i.oninput=()=>{a[k]=i.value;render();renderList()}});
+  $('#toO').onclick=()=>{a.x=O.x;a.y=O.y;if(!st.axes){st.axes=true;$('#tAxes').setAttribute('aria-pressed','true');syncAxisInputs()}render();renderList()};
+  $('#front').onclick=()=>{st.angles.splice(st.angles.indexOf(a),1);st.angles.push(a);render();renderList()};
+  $('#back').onclick=()=>{st.angles.splice(st.angles.indexOf(a),1);st.angles.unshift(a);render();renderList()};
+  $('#dup').onclick=()=>{const n=addAngle(a.val,{...a,id:undefined,x:Math.min(W-60,a.x+40),y:Math.min(H-60,a.y+40),hidden:false});n.id=st.next++;st.sel=n.id;render();renderList();renderEditor()};
+  $('#del').onclick=()=>{st.angles=st.angles.filter(x=>x!==a);st.sel=null;render();renderList();renderEditor()};
+  syncEditor();
+}
+function syncEditor(){
+  const a=sel();if(!a||!$('#eVal'))return;
+  const set=(id,v)=>{const el=$(id);if(document.activeElement!==el)el.value=v};
+  set('#eVal',a.val);set('#nVal',a.val);set('#eRot',a.rot);set('#nRot',a.rot);set('#eR',a.r);set('#eLen',a.len);
+  $('#dCCW').classList.toggle('on',a.dir>0);$('#dCW').classList.toggle('on',a.dir<0);
+}
+
+/* ---------- toggles & actions ---------- */
+const tog=(id,key,after)=>{$(id).onclick=()=>{st[key]=!st[key];$(id).setAttribute('aria-pressed',st[key]);after&&after();render();renderList()}};
+tog('#tAxes','axes',syncAxisInputs);tog('#tRight','right');tog('#tSnap','snap');
+$('#lblStd').onclick=()=>{st.lab={top:'A',bottom:'B',left:'C',right:'D',center:'O'};syncAxisInputs();renderList()};
+$('#lblClear').onclick=()=>{st.lab={top:'',bottom:'',left:'',right:'',center:''};syncAxisInputs();renderList()};
+$('#clear').onclick=()=>{st.angles=[];st.sel=null;render();renderList();renderEditor()};
+function example(){
+  st.angles=[];st.axes=true;$('#tAxes').setAttribute('aria-pressed','true');
+  st.lab={top:'A',bottom:'B',left:'C',right:'D',center:'O'};syncAxisInputs();
+  addAngle(90,{x:O.x,y:O.y,rot:0,color:COLORS[1],r:150,len:280});
+  addAngle(56,{x:O.x,y:O.y,rot:0,color:COLORS[0],r:96,len:280,l2:'E'});
+  addAngle(34,{x:150,y:620,rot:0,color:COLORS[2],r:110,len:220,txt:'?'});
+  render();renderList();renderEditor();
+}
+$('#example').onclick=example;
+
+example();
+})();
+</script>
+</body>
+</html>
