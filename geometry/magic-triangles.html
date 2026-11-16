@@ -1,0 +1,216 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Магічні трикутники</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Карта рівнів, як у «Формули без страху»; кожне завдання — випадковий генератор */
+:root{--bg:#f1f5f9;--fg:#0f172a;--mut:#64748b;--card:#fff;--bd:#e2e8f0;--acc:#2563eb;--ok:#16a34a;--okb:#dcfce7;--bad:#dc2626;--badb:#fee2e2;--a:#2563eb;--b:#ea580c;--hl:#f59e0b;--c:#0d9488;--u:#dc2626}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--fg:#f1f5f9;--mut:#94a3b8;--card:#162033;--bd:#2b3a55;--acc:#60a5fa;--okb:#14532d;--badb:#7f1d1d;--a:#60a5fa;--b:#fb923c;--c:#2dd4bf;--u:#f87171;color-scheme:dark}}
+:root[data-theme="dark"]{--c:#2dd4bf;--u:#f87171;--bg:#0b1220;--fg:#f1f5f9;--mut:#94a3b8;--card:#162033;--bd:#2b3a55;--acc:#60a5fa;--okb:#14532d;--badb:#7f1d1d;--a:#60a5fa;--b:#fb923c;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:17px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding-block:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app{max-width:680px;margin:0 auto}
+h1{font-size:24px;margin:4px 0;text-wrap:balance}h2{font-size:20px;margin:0 0 8px;text-wrap:balance}h3{font-size:17px;margin:18px 0 4px}
+.mut{color:var(--mut);font-size:14px}.a{color:var(--a);font-weight:700}.b{color:var(--b);font-weight:700}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;margin:12px 0}
+.lv{display:flex;gap:12px;align-items:center;width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.lv .e{font-size:28px;min-width:36px;text-align:center}
+.btn{font:inherit;font-weight:600;padding:10px 18px;border-radius:12px;border:0;background:var(--acc);color:var(--bg);cursor:pointer}
+.btn.g{background:transparent;color:var(--acc);border:1px solid var(--bd)}
+.btn:focus-visible,.opt:focus-visible,.in:focus-visible,.lv:focus-visible{outline:3px solid var(--hl);outline-offset:2px}
+.seg{display:inline-flex;border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.seg button{font:inherit;padding:8px 16px;border:0;background:transparent;color:var(--fg);cursor:pointer}
+.seg button.on{background:var(--acc);color:var(--bg);font-weight:600}
+.opt{display:block;width:100%;margin:8px 0;padding:12px;font:inherit;font-size:18px;border-radius:12px;border:2px solid var(--bd);background:var(--card);color:var(--fg);cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--acc)}.opt.ok{border-color:var(--ok);background:var(--okb)}.opt.no{border-color:var(--bad);background:var(--badb)}
+.q{font-size:20px;line-height:2.1;margin:8px 0 10px}
+.in{width:4.6em;font:inherit;font-size:20px;text-align:center;padding:2px 4px;border:2px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg)}
+.in.ok{border-color:var(--ok);background:var(--okb)}.in.no{border-color:var(--bad);background:var(--badb)}
+.sqrt{font:inherit;font-weight:700;padding:4px 12px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--acc);cursor:pointer}
+.dots{display:flex;gap:6px;margin:6px 0}.dots i{flex:1;height:10px;border-radius:5px;background:var(--bd)}.dots i.on{background:var(--ok)}
+.fb{padding:12px;border-radius:12px;margin-top:12px}.fb.ok{background:var(--okb)}.fb.no{background:var(--badb)}
+.hint{margin-top:10px;padding:10px;border-radius:10px;border:1px dashed var(--acc);font-size:15px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.figs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
+.figs svg{max-width:100%;height:auto;flex:1 1 220px;max-height:210px}
+svg text{font-family:system-ui,sans-serif;font-size:15px;font-weight:700;fill:var(--fg);text-anchor:middle;dominant-baseline:central}
+svg text.u{fill:var(--u);font-size:17px}svg text.an{fill:var(--fg);font-size:13px}
+.stars{font-size:34px;text-align:center;margin:8px 0}
+table.tr{border-collapse:collapse;margin:8px auto;font-weight:700;text-align:center}
+table.tr th,table.tr td{border:1px solid var(--bd);padding:4px 14px;min-width:3.2em}
+table.tr th{background:var(--bg);font-style:italic}
+details{margin-top:10px}summary{cursor:pointer;font-weight:600}
+@media (prefers-reduced-motion:no-preference){.opt,.btn{transition:border-color .15s,background .15s}}
+</style>
+<div id="app"></div>
+<script>
+const $=i=>document.getElementById(i),R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,pick=a=>a[R(0,a.length-1)],sh=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]),coin=()=>Math.random()<.5;
+const GOAL=5;
+let S={d:0,st:{}};try{S=Object.assign(S,JSON.parse(localStorage.getItem('pyth2'))||{})}catch(e){}
+const save=()=>{try{localStorage.setItem('pyth2',JSON.stringify(S))}catch(e){}};
+/* трійки: тільки 3-4-5, 5-12-13, 8-15-17, 7-24-25 та їх добутки на 2 і 3 */
+const BASE=[[3,4,5],[5,12,13],[8,15,17],[7,24,25]];
+const TR=[];BASE.forEach(b=>[1,2,3].forEach(k=>TR.push({t:b.map(v=>v*k),k,b})));
+const trName=o=>o.b.join('–')+(o.k>1?' ×'+o.k:'');
+/* корені: {k,m} = k√m, m без квадратних множників */
+const sq=n=>{for(let i=Math.floor(Math.sqrt(n));i>1;i--)if(n%(i*i)==0)return{k:i,m:n/(i*i)};return{k:1,m:n}};
+const rad=(k,m)=>({k,m});
+const fmt=a=>a.m==1?''+a.k:a.k==1?'√'+a.m:a.k+'√'+a.m;
+const val2=a=>a.k*a.k*a.m;
+const isSq=n=>Number.isInteger(Math.sqrt(n));
+const rt=n=>{const s=sq(n);return s.m==1?{k:s.k,m:1}:s};
+function parse(s){s=String(s).toLowerCase().replace(/\s|[·*×]/g,'').replace(/sqrt|корінь|кор|v/g,'√').replace(/[−–]/g,'-');
+let m=s.match(/^(\d+)$/);if(m)return{k:+m[1],m:1};m=s.match(/^(\d*)√\(?(\d+)\)?$/);if(m)return{k:m[1]?+m[1]:1,m:+m[2]};return null}
+function cmp(inp,ans){const p=parse(inp);if(!p)return'bad';if(val2(p)!=val2(ans))return'no';return sq(p.m).k==1&&(p.m>1||p.k==ans.k)?'ok':'simp'}
+</script>
+<script>
+/* малювання прямокутного трикутника: C — прямий кут, B — кінець горизонтального катета, A — кінець вертикального */
+const DO='d<tspan font-size="11" dy="4">о</tspan>',DOH='d<sub>о</sub>';
+const T=(t,u)=>({t:String(t),u:!!u});
+function tri(o){const W=280,H=200,pad=46;let w=o.w,h=o.h;const r=w/h;if(r<.5)w=h*.5;if(r>2)h=w*.5;
+const s=Math.min((W-2*pad)/w,(H-2*pad)/h),pw=w*s,ph=h*s,x0=(W-pw)/2,y0=(H+ph)/2;
+const tx=p=>[o.fx?W-p[0]:p[0],o.fy?H-p[1]:p[1]];
+const C=tx([x0,y0]),B=tx([x0+pw,y0]),A=tx([x0,y0-ph]),G=[(A[0]+B[0]+C[0])/3,(A[1]+B[1]+C[1])/3];
+const nrm=v=>{const l=Math.hypot(v[0],v[1])||1;return[v[0]/l,v[1]/l]},sub=(p,q)=>[p[0]-q[0],p[1]-q[1]];
+const lab=(P,Q,l,d)=>{if(!l)return'';const m=[(P[0]+Q[0])/2,(P[1]+Q[1])/2],e=nrm(sub(Q,P));let n=[-e[1],e[0]];if(n[0]*(m[0]-G[0])+n[1]*(m[1]-G[1])<0)n=[-n[0],-n[1]];const tw=(l.u?11:9.5)*l.t.replace(/<[^>]+>/g,'').length+6,th=20,o=d+tw/2*Math.abs(n[0])+th/2*Math.abs(n[1]),x=m[0]+n[0]*o,y=m[1]+n[1]*o;return`<text class="${l.u?'u':''}" x="${x.toFixed(1)}" y="${y.toFixed(1)}">${l.t}</text>`};
+const sl=(P,Q,l)=>`<line x1="${P[0].toFixed(1)}" y1="${P[1].toFixed(1)}" x2="${Q[0].toFixed(1)}" y2="${Q[1].toFixed(1)}" stroke="${l&&l.u?'var(--u)':'currentColor'}" stroke-width="2.6" stroke-linecap="round"/>`;
+const uC1=nrm(sub(A,C)),uC2=nrm(sub(B,C)),k=11;
+const ra=`<polyline points="${[C[0]+uC1[0]*k,C[1]+uC1[1]*k]} ${[C[0]+(uC1[0]+uC2[0])*k,C[1]+(uC1[1]+uC2[1])*k]} ${[C[0]+uC2[0]*k,C[1]+uC2[1]*k]}" fill="none" stroke="currentColor" stroke-width="1.6"/>`;
+const arc=(V,P,Q,t)=>{if(!t)return'';const u1=nrm(sub(P,V)),u2=nrm(sub(Q,V)),rr=22,sw=(u1[0]*u2[1]-u1[1]*u2[0])>0?1:0,b=nrm([u1[0]+u2[0],u1[1]+u2[1]]),th=Math.acos(Math.max(-1,Math.min(1,u1[0]*u2[0]+u1[1]*u2[1]))),ds=Math.min(54,Math.max(rr+14,(t.length*3.6+5)/Math.tan(th/2)));
+return`<path d="M${V[0]+u1[0]*rr} ${V[1]+u1[1]*rr} A${rr} ${rr} 0 0 ${sw} ${V[0]+u2[0]*rr} ${V[1]+u2[1]*rr}" fill="none" stroke="currentColor" stroke-width="1.8"/><text class="an" x="${V[0]+b[0]*ds}" y="${V[1]+b[1]*ds}">${t}</text>`};
+const tick=(P,Q)=>{const m=[(P[0]+Q[0])/2,(P[1]+Q[1])/2],d=nrm(sub(Q,P)),n=[-d[1]*6,d[0]*6];return`<line x1="${m[0]-n[0]}" y1="${m[1]-n[1]}" x2="${m[0]+n[0]}" y2="${m[1]+n[1]}" stroke="currentColor" stroke-width="2"/>`};
+return`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="прямокутний трикутник">${sl(C,B,o.lh)}${sl(C,A,o.lv)}${sl(A,B,o.lc)}${ra}${arc(B,C,A,o.aB)}${arc(A,C,B,o.aA)}${o.tick?tick(C,A)+tick(C,B):''}${lab(C,B,o.lh,6)}${lab(C,A,o.lv,6)}${lab(A,B,o.lc,6)}</svg>`}
+const rnd=()=>({fx:coin(),fy:coin()});
+const mk=(q,ans,svg,hints,sol)=>({q,ans,svg:`<div class="figs">${svg}</div>`,hints,sol});
+const ctab=a=>a.m==1?a.k:a;
+/* Рівень 2: теорема Піфагора (без трійок, відповіді з коренями) */
+function g1(d){const hy=coin(),sw=coin(),ok=n=>!isSq(n)&&(d==0?sq(n).k==1:sq(n).k>1);let a,b,c,n;
+const f='Теорема Піфагора: a² + b² = c², де c — гіпотенуза, тобто сторона навпроти прямого кута.';
+if(hy){const lo=d?2:1,hi=d?9:6;do{a=R(lo,hi);b=R(lo,hi);n=a*a+b*b}while(!ok(n));const r=rt(n);
+return mk('x = {}',[r],tri({w:sw?a:b,h:sw?b:a,lh:T(sw?a:b),lv:T(sw?b:a),lc:T('x',1),...rnd()}),[f+' Тут x — гіпотенуза: x² = a² + b².',`x² = ${a}² + ${b}² = ${a*a} + ${b*b} = ${n}. ${r.k>1?`Винеси множник: ${n} = ${r.k*r.k}·${r.m}, тому x = √${n} = ${r.k}√${r.m}.`:`Число ${n} не містить повних квадратів, тож x = √${n}.`}`],`x = √${n} = ${fmt(r)}`)}
+do{c=R(d?4:3,d?9:7);a=R(1,c-1);n=c*c-a*a}while(!ok(n));const r=rt(n);
+return mk('x = {}',[r],tri({w:sw?a:Math.sqrt(n),h:sw?Math.sqrt(n):a,lh:T(sw?a:'x',!sw),lv:T(sw?'x':a,sw),lc:T(c),...rnd()}),[f+' Гіпотенуза c = '+c+', тож шуканий катет: x² = c² − a².',`x² = ${c}² − ${a}² = ${c*c} − ${a*a} = ${n}. ${r.k>1?`Винеси множник: ${n} = ${r.k*r.k}·${r.m}, тому x = ${r.k}√${r.m}.`:`Число ${n} не містить повних квадратів, тож x = √${n}.`}`],`x = √${n} = ${fmt(r)}`)}
+/* Рівень 2: трійки */
+function g2(d){
+if(d==1&&coin()){const o=pick(TR),t=o.t,bad=()=>{const x=t.slice();const i=R(0,2);x[i]+=pick([-2,-1,1,2]);return x},ok=t.join(', '),ws=new Set();let n=0;while(ws.size<3&&n++<80){const x=bad();if(x[0]>0&&x[0]*x[0]+x[1]*x[1]!=x[2]*x[2])ws.add(x.join(', '))}
+return{q:'Яка з цих трійок чисел — піфагорова?',opts:sh([ok,...ws]),ok,hints:['У піфагоровій трійці квадрат найбільшого числа дорівнює сумі квадратів двох інших. Або шукай знайомі 3–4–5, 5–12–13, 8–15–17, 7–24–25 та ті самі трійки, помножені на довільне натуральне число.',`Правильна — ${ok}: це трійка ${trName(o)}.`],sol:ok+' ('+trName(o)+')',svg:''}}
+const o=pick(d==0?TR.filter(x=>x.k<3):TR),t=o.t,i=R(0,2),hint2=o.k>1?`Поділи на ${o.k}: ${t.map(v=>v/o.k).join(', ')} — це ${o.b.join('–')}. Тож пропущене число — ${t[i]}.`:`Це трійка ${o.b.join('–')}, пропущене число — ${t[i]}.`;
+const cell=j=>j==i?'{}':t[j];
+return{q:`Доповни піфагорову трійку:<table class="tr"><tr><th>a</th><th>b</th><th>c</th></tr><tr><td>${cell(0)}</td><td>${cell(1)}</td><td>${cell(2)}</td></tr></table>`,ans:[rad(t[i],1)],svg:'',hints:[o.k>1?'Подумай, чи не є ці числа основною трійкою, збільшеною в кілька разів. Спробуй їх поділити.':'Це одна з чотирьох основних трійок: 3–4–5, 5–12–13, 8–15–17, 7–24–25.',hint2],sol:`${t.join(', ')} (${trName(o)})`}}
+/* Рівень 3: 45-45-90 */
+function g3(d){const k=R(2,9),tp=d==0?R(0,1):R(0,3),tk=coin(),an=!tk||coin(),base={tick:tk,aB:an?'45°':'',aA:an?'45°':'',...rnd(),w:1,h:1};
+const hy='У трикутнику 45°–45°–90° катети рівні, а гіпотенуза у √2 разів більша: катет x → гіпотенуза x√2.';
+if(tp==0)return mk('x = {}',[rad(k,2)],tri({...base,lh:T(k),lv:T(k),lc:T('x',1)}),[hy,`Катет ${k} → гіпотенуза ${k}·√2 = ${k}√2.`],`x = ${k}√2`);
+if(tp==1)return mk('x = {}',[rad(k,1)],tri({...base,lh:T('x',1),lv:T('x',1),lc:T(k+'√2')}),[hy+' Тож гіпотенуза поділена на √2 дає катет.',`Гіпотенуза ${k}√2 : √2 = ${k}. Катет x = ${k}.`],`x = ${k}`);
+if(tp==2){const h=2*k;return mk('x = {}',[rad(k,2)],tri({...base,lh:T('x',1),lv:T('x',1),lc:T(h)}),['Катети рівні, x — катет. Гіпотенуза = катет·√2, тому катет = гіпотенуза : √2.',`${h} : √2 = ${h}/√2 = ${h}√2/2 = ${k}√2 (домножили на √2 угорі й унизу, щоб прибрати корінь знизу).`],`x = ${h}/√2 = ${k}√2`)}
+return mk('x = {}',[rad(2*k,1)],tri({...base,lh:T(k+'√2'),lv:T(k+'√2'),lc:T('x',1)}),[hy,`Катет ${k}√2 → гіпотенуза ${k}√2·√2 = ${k}·2 = ${2*k}.`],`x = ${k}√2·√2 = ${2*k}`)}
+/* Рівень 4: 30-60-90 */
+function g4(d){const k=R(1,d==0?9:5),V=d==0?[rad(k,1),rad(k,3),rad(2*k,1)]:[rad(k,3),rad(3*k,1),rad(2*k,3)];
+const gi=R(0,2),un=[0,1,2].filter(i=>i!=gi),sv=coin(),nm=['m','n'],lab=[null,null,null];
+lab[gi]=T(fmt(V[gi]));un.forEach((s,j)=>lab[s]=T(nm[j],1));
+const o={w:sv?1.732:1,h:sv?1:1.732,aB:sv?'30°':'60°',aA:sv?'60°':'30°',...rnd()};
+// горизонтальний катет: коротший, якщо коротший лежить поруч із кутом 60° на B; тут sv — вертикальний катет короткий
+const horiz=sv?lab[1]:lab[0],vert=sv?lab[0]:lab[1];
+const fig=tri({...o,lh:horiz,lv:vert,lc:lab[2]});
+const nameS=`найкоротша сторона (навпроти 30°) = x`;
+const gtxt=['найкоротша сторона (навпроти кута 30°)','довший катет (навпроти кута 60°)','гіпотенуза'][gi];
+return mk(`Знайди сторони: m = {}, n = {}`,un.map(i=>V[i]),fig,['У трикутнику 30°–60°–90° позначимо найкоротшу сторону (навпроти 30°) через x. Тоді довший катет = x√3, а гіпотенуза = 2x.',`Відомо ${gtxt}: ${fmt(V[gi])}. ${gi==0?'Тут одразу x = '+fmt(V[0])+'.':gi==2?`Це 2x, тож x = ${fmt(V[2])} : 2 = ${fmt(V[0])}.`:`Це x√3, тож x = ${fmt(V[1])} : √3 = ${fmt(V[0])}.`} Далі: x√3 = ${fmt(V[1])}, 2x = ${fmt(V[2])}.`],`x = ${fmt(V[0])}, x√3 = ${fmt(V[1])}, 2x = ${fmt(V[2])}`)}
+/* малюнки тіл */
+const LB=(x,y,l,c)=>`<text class="${l.u?'u':''}" x="${x}" y="${y}">${l.t}</text>`;
+const stk='fill="none" stroke="currentColor" stroke-width="2"',dsh='fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3"';
+const ov=(x1,y1,x2,y2,l,dash)=>l&&l.u?`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--u)" stroke-width="3.2" stroke-linecap="round"${dash?' stroke-dasharray="6 3"':''}/>`:'';
+const cylSk=(r,h,dd)=>`<svg viewBox="0 0 170 180" role="img" aria-label="циліндр"><ellipse cx="85" cy="35" rx="50" ry="14" ${stk}/><path d="M35 35V140A50 14 0 0 0 135 140V35" ${stk}/><path d="M35 140A50 14 0 0 1 135 140" ${dsh}/><line x1="35" y1="35" x2="135" y2="35" ${dsh}/><line x1="35" y1="140" x2="135" y2="140" ${stk}/><line x1="35" y1="35" x2="135" y2="140" ${stk} stroke-dasharray="6 3"/><circle cx="85" cy="140" r="2.5" fill="currentColor"/>${ov(35,140,85,140,r)}${ov(35,35,35,140,h)}${ov(35,35,135,140,dd,1)}${LB(60,120,r)}${LB(17,88,h)}${LB(108,84,dd)}</svg>`;
+const coneSk=(r,h,l)=>`<svg viewBox="0 0 170 180" role="img" aria-label="конус"><path d="M25 140L85 20L145 140A60 16 0 0 1 25 140" ${stk}/><path d="M25 140A60 16 0 0 0 145 140" ${dsh}/><line x1="85" y1="20" x2="85" y2="140" ${dsh}/><line x1="85" y1="140" x2="145" y2="140" ${stk}/>${ov(85,140,145,140,r)}${ov(85,20,85,140,h,1)}${ov(85,20,145,140,l)}${LB(130,72,l)}${LB(67,80,h)}${LB(115,128,r)}</svg>`;
+const prSk=(a,b,h,dd,D)=>`<svg viewBox="0 0 200 175" role="img" aria-label="призма"><path d="M20 140V70H110V140ZM20 70L70 25H160L110 70M160 25V95L110 140" ${stk}/><path d="M20 140L70 95H160M70 95V25" ${dsh}/><line x1="20" y1="140" x2="160" y2="95" ${stk} stroke-dasharray="6 3"/><line x1="20" y1="70" x2="160" y2="95" ${stk} stroke-dasharray="6 3"/>${ov(20,140,110,140,a)}${ov(110,140,160,95,b)}${ov(20,70,20,140,h)}${ov(20,140,160,95,dd,1)}${ov(20,70,160,95,D,1)}${LB(65,156,a)}${LB(150,126,b)}${LB(8,105,h)}${LB(85,106,dd)}${LB(130,78,D)}</svg>`;
+const sk=(...a)=>a.join('');
+const hI={cyl:`Осьовий переріз циліндра — прямокутник зі сторонами 2r (діаметр основи) і h. Його діагональ ${DOH} разом із цими сторонами утворює прямокутний трикутник.`,cone:'Осьовий переріз конуса — рівнобедрений трикутник. Висота h, радіус r основи і твірна l утворюють прямокутний трикутник, де l — гіпотенуза.'};
+/* Рівень 5: циліндр */
+function g5(d){
+if(d==0){const o=pick(TR),[p,q,c]=o.t,ev=p%2==0?[p,q]:[q,p],e=ev[0],h=ev[1],r=e/2,ty=R(0,1);
+if(ty==0)return mk(`Циліндр: r = ${r}, h = ${h}. Діагональ осьового перерізу ${DOH} = {}`,[rad(c,1)],sk(cylSk(T('r'),T('h'),T(DO,1)),tri({w:e,h:h,lh:T('2r'),lv:T('h'),lc:T(DO,1)})),[hI.cyl,`Катети: 2r = ${e} і h = ${h}. ${DOH}² = ${e}² + ${h}² = ${e*e+h*h}. Це трійка ${trName(o)}.`],`d = ${c}`);
+return mk(`Циліндр: r = ${r}, діагональ осьового перерізу ${DOH} = ${c}. Висота h = {}`,[rad(h,1)],sk(cylSk(T('r'),T('h',1),T(DO)),tri({w:e,h:h,lh:T('2r'),lv:T('h',1),lc:T(DO)})),[hI.cyl,`Катети: 2r = ${e} і h; гіпотенуза ${DOH} = ${c}. h² = ${c}² − ${e}² = ${h*h}. Це трійка ${trName(o)}.`],`h = ${h}`)}
+const ty=R(0,3);
+if(ty==0){const o=pick(TR),[p,q,c]=o.t,ev=p%2==0?[p,q]:[q,p],e=ev[0],h=ev[1],r=e/2;
+return mk(`Циліндр: висота h = ${h}, діагональ осьового перерізу ${DOH} = ${c}. Радіус основи r = {}`,[rad(r,1)],sk(cylSk(T('r',1),T('h'),T(DO)),tri({w:e,h:h,lh:T('2r',1),lv:T('h'),lc:T(DO)})),[hI.cyl,`Катет трикутника — діаметр 2r, а не радіус. З трикутника: (2r)² = ${DOH}² − h² = ${c}² − ${h}² = ${e*e}, тож 2r = ${e}. Радіус — половина діаметра.`],`2r = ${e}, r = ${r}`)}
+const kk=R(1,4);
+if(ty==1)return mk(`Діагональ осьового перерізу циліндра ${DOH} = ${2*kk}√2 утворює з площиною основи кут 45°. Знайди h = {}, r = {}`,[rad(2*kk,1),rad(kk,1)],sk(cylSk(T('r',1),T('h',1),T(DO)),tri({w:1,h:1,aB:'45°',lh:T('2r',1),lv:T('h',1),lc:T(DO)})),[hI.cyl+' Кут 45° — трикутник рівнобедрений: 2r = h.',`Гіпотенуза = катет·√2, тож катет = ${DOH} : √2. Тоді h = ${2*kk} = 2r, звідси r = ${kk}.`],`h = ${2*kk}, 2r = ${2*kk}, r = ${kk}`);
+if(ty==2)return mk(`Діагональ осьового перерізу циліндра ${DOH} = ${4*kk} утворює з площиною основи кут 30°. Знайди h = {}, r = {}`,[rad(2*kk,1),rad(kk,3)],sk(cylSk(T('r',1),T('h',1),T(DO)),tri({w:1.732,h:1,aB:'30°',lh:T('2r',1),lv:T('h',1),lc:T(DO)})),[hI.cyl+' Кут 30° — трикутник 30°–60°–90°: катет навпроти 30° дорівнює половині гіпотенузи.',`h лежить навпроти 30°, тому h = ${DOH} : 2 = ${2*kk}. Інший катет 2r = h·√3 = ${2*kk}√3, тож r = ${kk}√3.`],`h = ${2*kk}, 2r = ${2*kk}√3, r = ${kk}√3`);
+return mk(`Діагональ осьового перерізу циліндра ${DOH} = ${4*kk} утворює з площиною основи кут 60°. Знайди h = {}, r = {}`,[rad(2*kk,3),rad(kk,1)],sk(cylSk(T('r',1),T('h',1),T(DO)),tri({w:1,h:1.732,aB:'60°',lh:T('2r',1),lv:T('h',1),lc:T(DO)})),[hI.cyl+' Кут 60° — трикутник 30°–60°–90°; навпроти 30° лежить діаметр 2r.',`Навпроти 30° — 2r = ${DOH} : 2 = ${2*kk}, тож r = ${kk}. Висота h = 2r·√3 = ${2*kk}√3.`],`2r = ${2*kk}, r = ${kk}, h = ${2*kk}√3`)}
+/* Рівень 6: конус */
+function g6(d){
+if(d==0){const o=pick(TR),[p,q,c]=o.t,sw=coin(),r=sw?p:q,h=sw?q:p,ty=R(0,2),W=r,Hh=h;
+const f=(lr,lh,ll)=>sk(coneSk(lr,lh,ll),tri({w:W,h:Hh,lh:lr,lv:lh,lc:ll}));const ht=`Катети: r і h, гіпотенуза — твірна l. l² = r² + h². Це трійка ${trName(o)}.`;
+if(ty==0)return mk(`Конус: r = ${r}, h = ${h}. Твірна l = {}`,[rad(c,1)],f(T('r'),T('h'),T('l',1)),[hI.cone,`l² = ${r}² + ${h}² = ${r*r+h*h}. Це трійка ${trName(o)}.`],`l = ${c}`);
+if(ty==1)return mk(`Конус: r = ${r}, твірна l = ${c}. Висота h = {}`,[rad(h,1)],f(T('r'),T('h',1),T('l')),[hI.cone,`h² = l² − r² = ${c}² − ${r}² = ${h*h}. Це трійка ${trName(o)}.`],`h = ${h}`);
+return mk(`Конус: h = ${h}, твірна l = ${c}. Радіус основи r = {}`,[rad(r,1)],f(T('r',1),T('h'),T('l')),[hI.cone,`r² = l² − h² = ${c}² − ${h}² = ${r*r}. Це трійка ${trName(o)}.`],`r = ${r}`)}
+const k=R(1,6),ty=R(0,3);
+if(ty==0)return mk(`Твірна конуса l = ${2*k} утворює з висотою кут 30°. Знайди r = {}, h = {}`,[rad(k,1),rad(k,3)],sk(coneSk(T('r',1),T('h',1),T('l')),tri({w:1,h:1.732,aA:'30°',lh:T('r',1),lv:T('h',1),lc:T('l')})),[hI.cone+' Тут трикутник 30°–60°–90°: навпроти 30° лежить радіус r.',`r = l : 2 = ${k} (катет навпроти 30° — половина гіпотенузи). h = r·√3 = ${k}√3.`],`r = ${k}, h = ${k}√3`);
+if(ty==1)return mk(`Твірна конуса l = ${2*k} утворює з площиною основи кут 30°. Знайди r = {}, h = {}`,[rad(k,3),rad(k,1)],sk(coneSk(T('r',1),T('h',1),T('l')),tri({w:1.732,h:1,aB:'30°',lh:T('r',1),lv:T('h',1),lc:T('l')})),[hI.cone+' Кут 30° лежить навпроти висоти h, тому h — катет навпроти 30°.',`h = l : 2 = ${k}. r = h·√3 = ${k}√3.`],`h = ${k}, r = ${k}√3`);
+if(ty==2)return mk(`Осьовий переріз конуса — прямокутний рівнобедрений трикутник; твірна l = ${k}√2. Знайди r = {}, h = {}`,[rad(k,1),rad(k,1)],sk(coneSk(T('r',1),T('h',1),T('l')),tri({w:1,h:1,aA:'45°',aB:'45°',lh:T('r',1),lv:T('h',1),lc:T('l')})),[hI.cone+' Кут при вершині осьового перерізу тут 90°, тож трикутник з катетами r і h має кути 45°–45°–90°: r = h.',`Катет = гіпотенуза : √2 = ${k}√2 : √2 = ${k}. Отже r = h = ${k}.`],`r = h = ${k}`);
+return mk(`Осьовий переріз конуса — рівносторонній трикутник зі стороною ${2*k}. Знайди r = {}, h = {}`,[rad(k,1),rad(k,3)],sk(coneSk(T('r',1),T('h',1),T('l')),tri({w:1,h:1.732,aA:'30°',aB:'60°',lh:T('r',1),lv:T('h',1),lc:T('l')})),[hI.cone+' Сторона трикутника 2k — це і твірна, і діаметр основи. Висота рівностороннього трикутника ділить основу навпіл.',`l = ${2*k}, діаметр = ${2*k}, тому r = ${k}. Кути 30°–60°–90°: h = r·√3 = ${k}√3.`],`r = ${k}, h = ${k}√3`)}
+/* Рівень 7: призма */
+const CH=[];TR.forEach(x=>TR.forEach(y=>[0,1].forEach(i=>{if(y.t[i]==x.t[2])CH.push({x,y,i})})));
+function g7(d){const hp=`Діагональ основи ${DOH} — гіпотенуза трикутника з катетами a і b (сторони прямокутної основи). Діагональ призми d — гіпотенуза трикутника з катетами ${DOH} і h. Діагональ основи ${DOH} — це проєкція діагоналі призми d на площину основи.`;
+if(d==0||Math.random()<.2){const o=pick(TR),[p,q,c]=o.t,ty=R(0,1);
+if(d==1){const k=R(2,9);return mk(`Основа прямої призми — квадрат зі стороною ${k}. Діагональ основи ${DOH} = {}`,[rad(k,2)],sk(prSk(T('a'),T('a'),T('h'),T(DO,1),T('d')),tri({w:1,h:1,tick:1,lh:T('a'),lv:T('a'),lc:T(DO,1)})),['Діагональ квадрата — гіпотенуза трикутника 45°–45°–90° з катетами a (катет x → гіпотенуза x√2).',`${DOH} = a√2 = ${k}√2.`],`${DOH} = ${k}√2`)}
+if(ty==0)return mk(`Основа прямої призми — прямокутник ${p}×${q}. Діагональ основи ${DOH} = {}`,[rad(c,1)],sk(prSk(T('a'),T('b'),T('h'),T(DO,1),T('d')),tri({w:p,h:q,lh:T('a'),lv:T('b'),lc:T(DO,1)})),[`Основа — прямокутник зі сторонами a і b; його діагональ ${DOH} — гіпотенуза: ${DOH}² = a² + b².`,`${DOH}² = ${p}² + ${q}² = ${p*p+q*q}. Це трійка ${trName(o)}.`],`${DOH} = ${c}`);
+return mk(`Основа прямої призми — прямокутник; сторона a = ${p}, діагональ основи ${DOH} = ${c}. Інша сторона b = {}`,[rad(q,1)],sk(prSk(T('a'),T('b',1),T('h'),T(DO),T('d')),tri({w:p,h:q,lh:T('a'),lv:T('b',1),lc:T(DO)})),[`Діагональ ${DOH} — гіпотенуза трикутника з катетами a і b: b² = ${DOH}² − a².`,`b² = ${c}² − ${p}² = ${q*q}. Це трійка ${trName(o)}.`],`b = ${q}`)}
+const e=pick(CH),a=e.x.t[0],b=e.x.t[1],dd=e.x.t[2],h=e.y.t[1-e.i],D=e.y.t[2],ty=R(0,1),n1=trName(e.x),n2=trName(e.y);
+const fig=(u1,u2,u3)=>sk(prSk(T('a'),T('b'),T('h',u2),T(DO,u1),T('d',u3)),tri({w:dd,h:h,lh:T(DO),lv:T('h',u2),lc:T('d',u3)}));
+if(ty==0)return mk(`Основа прямої призми — прямокутник ${a}×${b}, висота призми h = ${h}. Знайди діагональ основи ${DOH} = {} і діагональ призми d = {}`,[rad(dd,1),rad(D,1)],fig(1,0,1),[hp,`Крок 1: ${DOH}² = ${a}² + ${b}² = ${a*a+b*b}, ${DOH} = ${dd} (трійка ${n1}). Крок 2: d² = ${DOH}² + h² = ${dd}² + ${h}² = ${dd*dd+h*h}.`],`${DOH} = ${dd}, d = ${D}`);
+return mk(`Основа прямої призми — прямокутник ${a}×${b}, діагональ призми d = ${D}. Знайди діагональ основи ${DOH} = {} і висоту h = {}`,[rad(dd,1),rad(h,1)],fig(1,1,0),[hp,`Крок 1: ${DOH}² = ${a}² + ${b}² = ${a*a+b*b}, ${DOH} = ${dd} (трійка ${n1}). Крок 2: h² = d² − ${DOH}² = ${D}² − ${dd}² = ${h*h} (трійка ${n2}).`],`${DOH} = ${dd}, h = ${h}`)}
+/* Рівень 8: мікс */
+const GEN=[g1,g2,g3,g4,g5,g6,g7];
+/* інтерфейс */
+const TRI_SHEET='<table class="tr"><tr><th>a</th><th>b</th><th>c</th></tr><tr><td>3</td><td>4</td><td>5</td></tr><tr><td>5</td><td>12</td><td>13</td></tr><tr><td>8</td><td>15</td><td>17</td></tr><tr><td>7</td><td>24</td><td>25</td></tr></table>Кожну трійку можна помножити на довільне натуральне число, наприклад, на 2, 3 і т.д.: 3–4–5 → 6–8–10 → 9–12–15.';
+const RULES='<b>45°–45°–90°</b>: катети x, x; гіпотенуза x√2.<br><b>30°–60°–90°</b>: x (навпроти 30°), x√3 (навпроти 60°), 2x (гіпотенуза).';
+const LV=[
+{n:'Піфагорові трійки',g:g2,d:'Трійки, які знають усі: 3–4–5, 5–12–13, 8–15–17, 7–24–25. Їх можна множити на довільне натуральне число. Це перший рівень: тут вчимося впізнавати їх одразу, без обчислень.'+TRI_SHEET},
+{n:'Теорема Піфагора',g:g1,d:'У прямокутному трикутнику <b>a² + b² = c²</b>, де c — гіпотенуза (навпроти прямого кута). Тут без трійок: рахуємо безпосередньо, числа невеликі. Відповідь — корінь. Простий рівень: корінь не спрощується, середній: треба винести множник з-під кореня.'},
+{n:'Трикутник 45–45–90',g:g3,d:'Катети рівні (x), гіпотенуза = <b>x√2</b>. Простий рівень: катет ↔ гіпотенуза з коренем. Середній: гіпотенуза без кореня, тоді катет = гіпотенуза : √2.'},
+{n:'Трикутник 30–60–90',g:g4,d:'Позначимо сторону навпроти 30° через x: тоді другий катет <b>x√3</b>, гіпотенуза <b>2x</b>. Дано одну сторону — знайдіть дві інші. Середній рівень: дані з коренями.'},
+{n:'Циліндр',g:g5,d:'Осьовий переріз — прямокутник 2r × h, а його діагональ d — гіпотенуза. Простий: трійки. Середній: знайти r, h за кутом діагоналі з основою.'},
+{n:'Конус',g:g6,d:'Висота h, радіус r і твірна l утворюють прямокутний трикутник, l — гіпотенуза. Простий: трійки. Середній: кути 30°, 45°, 60° та рівносторонній осьовий переріз.'},
+{n:'Призма',g:g7,d:'Діагональ основи d — гіпотенуза трикутника з катетами a і b. Діагональ призми D — гіпотенуза трикутника з катетами d і h. Простий: одна дія. Середній: два кроки та квадрат.'},
+{n:'Фінал: мікс',g:d=>pick(GEN)(d),d:'Завдання з усіх рівнів упереміш. Вгадати наперед, що попадеться, не вдасться.'}];
+const GR={0:'Основи',2:'Особливі трикутники',4:'Тіла'};
+let run=null;
+const star=n=>'★'.repeat(n)+'☆'.repeat(3-n);
+const key=i=>i+'_'+S.d;
+function diff(){return`<div class="seg" role="group" aria-label="Складність"><button class="${S.d==0?'on':''}" onclick="setD(0)">Простий</button><button class="${S.d==1?'on':''}" onclick="setD(1)">Середній</button></div>`}
+function setD(v){S.d=v;save();run?null:(window._cur=='intro'?intro(window._i):map())}
+function map(){run=null;window._cur='map';let h=`<h1>Магічні трикутники</h1><div class="mut">Теорема Піфагора, трійки, особливі трикутники та тіла. Завдання щоразу нові. Щоб пройти рівень, дай ${GOAL} правильних відповідей. Підказки можна відкривати скільки потрібно.</div><div class="row">${diff()}</div>`;
+LV.forEach((l,i)=>{if(GR[i])h+=`<h3>${GR[i]}</h3>`;const s=S.st[key(i)]||0;h+=`<button class="card lv" onclick="intro(${i})"><span class="e">${i+1}</span><span><b>${l.n}</b><br><span class="mut">${s?star(s):'ще не пройдено'}</span></span></button>`});
+h+=`<details class="card"><summary>Шпаргалка</summary><p>a² + b² = c²</p>${TRI_SHEET}<p>${RULES}</p></details>`;$('app').innerHTML=h}
+function intro(i){window._cur='intro';window._i=i;const l=LV[i];$('app').innerHTML=`<div class="card"><h2>Рівень ${i+1}. ${l.n}</h2><p>${l.d}</p><div class="row">${diff()}</div><div class="row"><button class="btn" onclick="start(${i})">Почати</button><button class="btn g" onclick="map()">До карти</button></div></div>`}
+function start(i){run={i,done:0,mist:0,answered:false,seen:new Set(),hi:0,tries:0};next()}
+function next(){let q,n=0;do{q=LV[run.i].g(S.d);n++}while(run.seen.has(q.q+q.sol)&&n<60);run.seen.add(q.q+q.sol);run.q=q;run.answered=false;run.hi=0;run.tries=0;draw()}
+const dots=()=>`<div class="dots">${Array.from({length:GOAL},(_,k)=>`<i class="${k<run.done?'on':''}"></i>`).join('')}</div>`;
+function hintBtn(){const q=run.q,n=q.hints.length;return run.answered?'':`<button class="btn g" onclick="hint()">💡 ${run.hi==0?'Підказка':run.hi<n?'Ще підказка':'Підказки закінчились'}</button>`}
+function hint(){const q=run.q;if(run.hi<q.hints.length)run.hi++;$('h').hidden=false;$('h').innerHTML=q.hints.slice(0,run.hi).map(x=>'<p style="margin:4px 0">'+x+'</p>').join('');$('hb').innerHTML=hintBtn()}
+function draw(){const q=run.q,l=LV[run.i];let b;
+if(q.opts)b=(q.svg||'')+`<div class="q">${q.q}</div>`+q.opts.map((o,k)=>`<button class="opt" data-k="${k}" onclick="pickOpt(${k})">${o}</button>`).join('');
+else{const p=q.q.split('{}');b=q.svg+`<div class="q">${p.map((s,k)=>s+(k<p.length-1?`<input class="in" id="in${k}" data-i="${k}" autocomplete="off" inputmode="text" aria-label="відповідь ${k+1}">`:'')).join('')}</div><div class="row"><button class="btn" id="ck" onclick="check()">Перевірити</button><button class="sqrt" onclick="addRoot()" aria-label="вставити знак кореня">√</button><span class="mut">Корінь: кнопка √ або літера v. Приклад: 5√2</span></div>`}
+$('app').innerHTML=`<div class="row" style="justify-content:space-between;margin:0"><button class="btn g" onclick="map()">← Карта</button><b>Рівень ${run.i+1}. ${l.n} · ${S.d?'середній':'простий'}</b></div>${dots()}<div class="card">${b}<div class="row" id="hb">${hintBtn()}</div><div class="hint" id="h" hidden></div><div id="fb"></div></div>`;
+const ins=[...document.querySelectorAll('.in')];window._last=ins[0];if(ins[0])ins[0].focus();ins.forEach(x=>{x.addEventListener('focus',()=>window._last=x);x.addEventListener('keydown',e=>{if(e.key=='Enter')run.answered?next():check()})})}
+function addRoot(){const x=window._last||document.querySelector('.in');if(!x)return;const s=x.selectionStart??x.value.length;x.value=x.value.slice(0,s)+'√'+x.value.slice(x.selectionEnd??s);x.focus();x.setSelectionRange(s+1,s+1)}
+function verdict(ok,solution){if(run.answered)return;run.answered=true;let fb;
+if(ok){run.done++;fb=`<div class="fb ok">✅ ${pick(['Чудово!','Так!','Влучно!','Саме так!'])}</div>`}
+else{fb=`<div class="fb no">Нічого страшного. Ось як правильно:<br><b>${solution}</b><br><span class="mut">${run.q.hints[run.q.hints.length-1]}</span></div>`}
+if(run.done>=GOAL)fb+=`<div class="row"><button class="btn" onclick="finish()">Рівень пройдено! 🎉</button></div>`;else fb+=`<div class="row"><button class="btn" onclick="next()">Далі →</button></div>`;
+document.querySelector('.dots').outerHTML=dots();$('fb').innerHTML=fb;$('hb').innerHTML='';const b=$('ck');if(b)b.disabled=true;document.querySelectorAll('.opt').forEach(o=>{o.disabled=true})}
+function pickOpt(k){if(run.answered)return;const q=run.q,ok=q.opts[k]==q.ok;document.querySelectorAll('.opt').forEach((o,j)=>{if(q.opts[j]==q.ok)o.classList.add('ok');else if(j==k)o.classList.add('no')});if(!ok)run.mist++;verdict(ok,q.sol)}
+function check(){if(run.answered)return;const q=run.q,ins=[...document.querySelectorAll('.in')];
+if(ins.some(x=>!x.value.trim())){$('fb').innerHTML='<div class="fb no">Заповніть усі пропуски.</div>';return}
+const rs=ins.map((x,k)=>cmp(x.value,q.ans[k]));
+if(rs.includes('bad')){$('fb').innerHTML='<div class="fb no">Запишіть число або число з коренем, наприклад 7 чи 5√2.</div>';return}
+if(rs.includes('simp')){$('fb').innerHTML='<div class="fb no">Значення правильне, але корінь ще можна спростити: винесіть множник з-під кореня.</div>';return}
+ins.forEach((x,k)=>{x.classList.remove('ok','no');x.classList.add(rs[k]=='ok'?'ok':'no')});
+if(rs.every(r=>r=='ok'))return verdict(true);
+run.tries++;if(run.tries==1){run.mist++;$('fb').innerHTML='<div class="fb no">Ще не те. Відкрийте підказку й спробуйте ще раз.</div>';return}
+verdict(false,q.sol)}
+function finish(){const i=run.i,s=run.mist==0?3:run.mist<=2?2:1,k=key(i);S.st[k]=Math.max(S.st[k]||0,s);save();
+$('app').innerHTML=`<div class="card" style="text-align:center"><h2>Рівень пройдено!</h2><div class="stars">${star(s)}</div><p>${s==3?'Без жодної помилки!':'Помилок: '+run.mist+'. Пройдіть ще раз, щоб отримати більше зірок.'}</p><div class="row" style="justify-content:center">${i<LV.length-1?`<button class="btn" onclick="intro(${i+1})">Наступний рівень →</button>`:''}<button class="btn g" onclick="start(${i})">Ще раз</button><button class="btn g" onclick="map()">До карти</button></div></div>`}
+map();
+</script>
+
+</body></html>
