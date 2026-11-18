@@ -1,0 +1,78 @@
+<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Перетворення графіків функцій</title>
+<style>
+:root{--bg:#f1f5f9;--fg:#0f172a;--mut:#64748b;--card:#fff;--bd:#cbd5e1;--acc:#1d4ed8;--grid:rgba(100,116,139,.18);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--fg:#f1f5f9;--mut:#94a3b8;--card:#162033;--bd:#2b3a55;--acc:#60a5fa;--grid:rgba(148,163,184,.18)}}
+:root[data-theme="dark"]{--bg:#0b1220;--fg:#f1f5f9;--mut:#94a3b8;--card:#162033;--bd:#2b3a55;--acc:#60a5fa;--grid:rgba(148,163,184,.18)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;padding:14px}
+#w{max-width:960px;margin:0 auto}h1{font-size:19px;margin:2px 0 10px;text-align:center}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;align-items:center}
+button{font:inherit;font-weight:600;padding:6px 11px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--fg);cursor:pointer}
+button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px;margin:8px 0}
+canvas{width:100%;display:block;border-radius:10px}
+label{font-size:14px;color:var(--mut)}input[type=range]{min-width:140px}
+#hd{animation:fi .6s}@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#hd h2{font-size:18px;margin:0 0 4px}.fm{font:600 24px "Cambria Math","Times New Roman",serif;color:var(--acc)}
+.per{margin-top:8px;padding:8px 10px;border-radius:10px;background:rgba(22,163,74,.13);border:2px solid #16a34a;font-size:15px}.pr{margin:4px 0}.ds{color:var(--mut);font-size:14px}.wn{margin-top:8px;padding:8px 10px;border-radius:10px;background:rgba(220,38,38,.12);border:2px solid #dc2626;font-size:15px}
+.q button{display:block;width:100%;text-align:left;margin:4px 0}.q small{color:var(--mut)}.ok{background:#16a34a!important;color:#fff}.no{background:#dc2626!important;color:#fff}
+</style></head><body><div id="w"><h1>Перетворення графіків функцій</h1>
+<div class="row" id="fs"><b>f(x) =</b></div><div class="row" id="tabs"></div>
+<div class="card"><div id="hd"></div><canvas id="cv"></canvas></div>
+<div class="row"><button id="pv">◀</button><button id="pl">⏸</button><button id="nx">▶</button><input type="range" id="sl" min="0" max="1" step="0.001" value="0" style="flex:1"><label><input type="checkbox" id="au" checked> серію підряд</label></div>
+<div class="row" id="ps"><label><b id="pn"></b> = <b id="pv2"></b> <input type="range" id="pr" step="0.1"></label></div>
+<details class="card"><summary><b>Перевір себе</b></summary><div id="qz"></div></details></div>
+<script>
+const $=i=>document.getElementById(i),cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),ez=x=>x*x*(3-2*x),lp=(a,b,t)=>a+(b-a)*t,F=v=>(+v.toFixed(2)).toString().replace('.',',').replace('-','−');
+const cv=$('cv'),g=cv.getContext('2d'),BL='#2563eb',RD='#dc2626',OR='#d97706';
+const FS=[['x²',x=>x*x],['x³',x=>x*x*x],['√x',x=>x<0?NaN:Math.sqrt(x)],['sin x',Math.sin],['2ˣ',x=>Math.pow(2,x)]];
+const S=[
+{t:'f(x)+b',n:'Зсув угору',pn:'b',r:[.5,4,2],fm:p=>`y = f(x) + ${F(p)}`,rl:p=>`(x; y + ${F(p)})`,ds:p=>`На ${F(p)} од. угору вздовж осі Oy`,G:(x,y,p)=>[x,y+p]},
+{t:'f(x)−b',n:'Зсув униз',pn:'b',r:[.5,4,2],fm:p=>`y = f(x) − ${F(p)}`,rl:p=>`(x; y − ${F(p)})`,ds:p=>`На ${F(p)} од. униз вздовж осі Oy`,G:(x,y,p)=>[x,y-p]},
+{t:'f(x+a)',n:'Зсув уліво',pn:'a',r:[.5,4,2],wn:1,fm:p=>`y = f(x + ${F(p)})`,rl:p=>`(x − ${F(p)}; y)`,ds:p=>`На ${F(p)} од. ВЛІВО вздовж осі Ox`,G:(x,y,p)=>[x-p,y]},
+{t:'f(x−a)',n:'Зсув управо',pn:'a',r:[.5,4,2],wn:2,fm:p=>`y = f(x − ${F(p)})`,rl:p=>`(x + ${F(p)}; y)`,ds:p=>`На ${F(p)} од. ВПРАВО вздовж осі Ox`,G:(x,y,p)=>[x+p,y]},
+{t:'−f(x)',n:'Симетрія відносно осі Ox',fm:()=>'y = −f(x)',rl:()=>'(x; −y)',ds:()=>'Дзеркальне відображення відносно горизонтальної осі Ox',G:(x,y)=>[x,-y]},
+{t:'f(−x)',n:'Симетрія відносно осі Oy',fm:()=>'y = f(−x)',rl:()=>'(−x; y)',ds:()=>'Дзеркальне відображення відносно вертикальної осі Oy',G:(x,y)=>[-x,y]},
+{t:'−f(−x)',n:'Симетрія відносно початку координат',fm:()=>'y = −f(−x)',rl:()=>'(−x; −y)',ds:()=>'Центральна симетрія відносно точки (0; 0)',G:(x,y)=>[-x,-y]},
+{t:'k·f(x)',n:'Розтяг / стиск від осі Ox',pn:'k',r:[.3,3,2],fm:p=>`y = ${F(p)}·f(x)`,rl:p=>`(x; ${F(p)}·y)`,ds:p=>p>1?`Розтяг у ${F(p)} раза від осі Ox`:`Стиск у ${F(1/p)} раза до осі Ox`,G:(x,y,p)=>[x,p*y]},
+{t:'f(k·x)',per:1,n:'Стиск / розтяг від осі Oy',pn:'k',r:[.3,3,2],fm:p=>`y = f(${F(p)}·x)`,rl:p=>`(x/${F(p)}; y)`,ds:p=>p>1?`Стиск у ${F(p)} раза до осі Oy`:`Розтяг у ${F(1/p)} раза від осі Oy`,G:(x,y,p)=>[x/p,y]},
+{t:'|f(x)|',n:'Модуль функції',neg:1,fm:()=>'y = |f(x)|',rl:()=>'(x; |y|)',ds:()=>'Вище осі Ox (і на осі) — без змін; нижче — симетрія відносно осі Ox',G:(x,y)=>[x,Math.abs(y)]},
+{t:'f(|x|)',n:'Модуль аргументу',sp:1,fm:()=>'y = f(|x|)',rl:()=>'(x; y) лишається при x ≥ 0, а її копія (−x; y) іде вліво',ds:()=>'Праворуч від осі Oy (і на осі) — без змін; ліва частина замінюється симетрією правої відносно осі Oy',G:(x,y)=>[-x,y]}];
+const WN=['⚠️ <b>Пастка!</b> У формулі «x <b>+</b> a», а графік зсувається <b>ВЛІВО</b>. Значення f(x₀) тепер набувається, коли x + a = x₀, тобто в точці x = x₀ − a. Запам’ятайте: <b>f(x + a) — вліво, f(x − a) — вправо.</b>','⚠️ <b>Пастка!</b> У формулі «x <b>−</b> a», а графік зсувається <b>ВПРАВО</b>. Значення f(x₀) тепер набувається, коли x − a = x₀, тобто в точці x = x₀ + a. Запам’ятайте: <b>f(x − a) — вправо, f(x + a) — вліво.</b>'];
+const Q=[['Графік y = f(x + 3) отримують із графіка y = f(x) зсувом…',['на 3 вправо','на 3 вліво','на 3 угору'],1,'«+» під функцією означає зсув у протилежний бік — вліво.'],['Куди переходить точка (2; 5) при y = −f(−x)?',['(−2; 5)','(2; −5)','(−2; −5)'],2,'Центральна симетрія: (x; y) → (−x; −y).'],['y = 2·f(x): що відбувається з графіком?',['Розтяг у 2 рази від осі Ox','Стиск у 2 рази до осі Ox','Розтяг у 2 рази від осі Oy'],0,'Усі ординати множаться на 2.'],['Що відбувається з частиною графіка нижче Ox при y = |f(x)|?',['Видаляється','Симетрія відносно Ox','Зсув угору'],1,'Від’ємні значення стають додатними.'],['Період y = sin x дорівнює 2π. Який період y = sin 3x?',['6π','2π/3','π/3'],1,'T = T₀/|k| = 2π/3.']];
+$('qz').innerHTML=Q.map((x,i)=>`<div class="q"><b>${i+1}. ${x[0]}</b>${x[1].map((o,j)=>`<button onclick="ans(this,${i},${j})">${o}</button>`).join('')}<small></small></div>`).join('');
+function ans(b,i,j){const ok=j==Q[i][2];b.classList.add(ok?'ok':'no');b.parentNode.querySelector('small').textContent=(ok?'Так. ':'Ні. ')+Q[i][3]}
+let cs=0,fi=0,T=0,p=2,play=true,last=0,W,H,u,FG,GR,pts;
+$('fs').innerHTML+=FS.map((f,i)=>`<button data-i="${i}" onclick="setF(${i})">${f[0]}</button>`).join('');
+$('tabs').innerHTML=S.map((s,i)=>`<button data-i="${i}" onclick="setScene(${i})">${i+1}. ${s.t}</button>`).join('');
+function build(){pts=[];for(let x=-7;x<=7.001;x+=.04){const y=FS[fi][1](x);pts.push(isFinite(y)&&Math.abs(y)<14?[x,y]:null)}}
+function px0(){if(S[cs].neg)for(const x of[-1,-2,-.5,-3,-1.5]){if(FS[fi][1](x)<-.2)return x}return 1}
+function PER(){const s=fi==3,v=2/p,pi=Math.abs(v-1)<1e-9?'π':F(v)+'π';return `<div class="per"><b>Період!</b> Якщо f періодична з періодом T₀, то y = f(kx) має період <b>T = T₀/|k|</b>.${s?` Для sin x: T₀ = 2π, тож T = 2π/${F(p)} = <b>${pi}</b>${p>1?' — графік стискається до осі Oy, хвиль стає більше.':' — графік розтягується від осі Oy, хвилі стають довшими.'}`:' Оберіть sin x, щоб побачити це на графіку.'}</div>`}
+function panel(){const sc=S[cs],x0=px0(),y0=FS[fi][1](x0),P1=sc.G(x0,y0,p);
+$('hd').innerHTML=`<h2>${cs+1}. ${sc.n}</h2><div class="fm">${sc.fm(p)}</div><div class="pr">Точка (x; y) → <b>${sc.rl(p)}</b><br>Приклад: (${F(x0)}; ${F(y0)}) → (${F(P1[0])}; ${F(P1[1])})</div><div class="ds">${sc.ds(p)}</div>${sc.wn?`<div class="wn">${WN[sc.wn-1]}</div>`:''}${sc.per?PER():''}`}
+function setScene(i){cs=i;const s=S[i];T=0;play=true;p=s.r?s.r[2]:1;$('pl').textContent='⏸';$('ps').style.display=s.r?'':'none';if(s.r){const r=$('pr');r.min=s.r[0];r.max=s.r[1];r.value=p;$('pn').textContent=s.pn;$('pv2').textContent=F(p)}
+[...$('tabs').children].forEach(b=>b.classList.toggle('on',b.dataset.i==i));panel()}
+function setF(i){fi=i;build();[...$('fs').querySelectorAll('button')].forEach(b=>b.classList.toggle('on',b.dataset.i==i));panel()}
+$('pr').oninput=e=>{p=+e.target.value;$('pv2').textContent=F(p);T=.9;play=false;$('pl').textContent='▶';panel()};
+$('pl').onclick=()=>{play=!play;$('pl').textContent=play?'⏸':'▶'};$('sl').oninput=e=>{T=+e.target.value};
+$('pv').onclick=()=>setScene((cs+S.length-1)%S.length);$('nx').onclick=()=>setScene((cs+1)%S.length);
+function size(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;W=r.width;H=Math.round(W*(W<640?.85:.58));cv.style.height=H+'px';cv.width=W*d;cv.height=H*d;g.setTransform(d,0,0,d,0,0);u=Math.min(W/13,H/9)}
+addEventListener('resize',size);
+const X=x=>W/2+x*u,Y=y=>H/2-y*u;
+function axes(){g.strokeStyle=GR;g.lineWidth=1;g.beginPath();for(let i=-6;i<=6;i++){g.moveTo(X(i),0);g.lineTo(X(i),H)}for(let j=-4;j<=4;j++){g.moveTo(0,Y(j));g.lineTo(W,Y(j))}g.stroke();g.strokeStyle=FG;g.lineWidth=1.6;g.beginPath();g.moveTo(0,Y(0));g.lineTo(W,Y(0));g.moveTo(X(0),0);g.lineTo(X(0),H);g.stroke();g.fillStyle=FG;g.font='12px system-ui';g.textAlign='center';for(let i=-6;i<=6;i++)if(i)g.fillText(i<0?'−'+-i:i,X(i),Y(0)+15);g.textAlign='right';for(let j=-4;j<=4;j++)if(j)g.fillText(j<0?'−'+-j:j,X(0)-5,Y(j)+4);g.font='italic 16px serif';g.fillText('x',W-8,Y(0)-7);g.fillText('y',X(0)-8,14);g.fillText('O',X(0)-5,Y(0)+15)}
+function curve(list,col,w,dash){g.save();g.setLineDash(dash||[]);g.strokeStyle=col;g.lineWidth=w;g.lineJoin='round';g.beginPath();let pen=false,py=0;for(const q of list){if(!q){pen=false;continue}const a=X(q[0]),b=Y(q[1]);if(pen&&Math.abs(b-py)<H*.7)g.lineTo(a,b);else g.moveTo(a,b);pen=true;py=b}g.stroke();g.restore()}
+function dot(x,y,col,fillIt=true){g.beginPath();g.arc(X(x),Y(y),6,0,7);if(fillIt){g.fillStyle=col;g.fill()}g.strokeStyle=col;g.lineWidth=2.5;g.stroke()}
+function lab(t,x,y,col,dx=0,dy=0){g.font='italic bold 17px "Times New Roman",serif';g.textAlign='center';g.lineWidth=4;g.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--card');g.strokeText(t,X(x)+dx,Y(y)+dy);g.fillStyle=col;g.fillText(t,X(x)+dx,Y(y)+dy)}
+function draw(){const st=getComputedStyle(document.documentElement);FG=st.getPropertyValue('--fg').trim();GR=st.getPropertyValue('--grid').trim();g.clearRect(0,0,W,H);axes();
+const sc=S[cs],e=ez(cl((T-.15)/.6)),mv=(l,G)=>l.map(q=>{if(!q)return null;const r=G(q[0],q[1],p);return[lp(q[0],r[0],e),lp(q[1],r[1],e)]});
+curve(pts,'#94a3b8',2,[6,5]);
+if(sc.sp){const h=pts.map(q=>q&&q[0]>=0?q:null);curve(h,BL,3.5);curve(mv(h,sc.G),BL,3.5)}else curve(mv(pts,sc.G),BL,3.5);
+if(sc.per&&fi==3){const T0=2*Math.PI,T1=lp(T0,T0/p,e),y=-3.2;g.save();g.lineWidth=3;g.strokeStyle='#94a3b8';g.beginPath();g.moveTo(X(0),Y(y));g.lineTo(X(T0),Y(y));g.moveTo(X(0),Y(y)-6);g.lineTo(X(0),Y(y)+6);g.moveTo(X(T0),Y(y)-6);g.lineTo(X(T0),Y(y)+6);g.stroke();g.strokeStyle='#16a34a';g.beginPath();g.moveTo(X(0),Y(y-.5));g.lineTo(X(T1),Y(y-.5));g.moveTo(X(T1),Y(y-.5)-6);g.lineTo(X(T1),Y(y-.5)+6);g.stroke();g.restore();lab('T₀ = 2π',T0/2,y,'#64748b',0,-9);lab('T = T₀/k',T1/2,y-.5,'#16a34a',0,22)}
+const x0=px0(),y0=FS[fi][1](x0),P1=sc.G(x0,y0,p),Pc=[lp(x0,P1[0],e),lp(y0,P1[1],e)];
+if(sc.wn){g.save();g.setLineDash([3,4]);g.strokeStyle=OR;g.lineWidth=1.5;g.beginPath();g.moveTo(X(x0),Y(0));g.lineTo(X(x0),Y(y0));g.moveTo(X(P1[0]),Y(0));g.lineTo(X(P1[0]),Y(y0));g.stroke();g.restore();dot(x0,0,'#94a3b8');dot(P1[0],0,OR);lab('x₀',x0,0,'#64748b',0,28);lab(sc.wn==1?'x₀ − a':'x₀ + a',P1[0],0,OR,0,28)}
+if(e>0){g.save();g.setLineDash([4,4]);g.strokeStyle=RD;g.lineWidth=1.5;g.beginPath();g.moveTo(X(x0),Y(y0));g.lineTo(X(Pc[0]),Y(Pc[1]));g.stroke();g.restore()}
+dot(x0,y0,'#94a3b8');lab('P',x0,y0,'#64748b',-12,-10);dot(Pc[0],Pc[1],RD);if(e>.98)lab('P′',Pc[0],Pc[1],RD,12,-10);
+if(sc.wn&&e>.05&&e<.98)lab(sc.wn==1?'← ВЛІВО':'ВПРАВО →',Pc[0],Pc[1],OR,0,-28)}
+function fr(n){const d=Math.min(.05,(n-last)/1000);last=n;if(play){T+=d/9;if(T>1.15){if($('au').checked)setScene((cs+1)%S.length);else T=0}}$('sl').value=Math.min(T,1);draw();requestAnimationFrame(fr)}
+size();build();setF(0);setScene(0);requestAnimationFrame(fr);
+</script></body></html>
